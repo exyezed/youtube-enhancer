@@ -1,10 +1,10 @@
 ![Untitled-0](https://github.com/user-attachments/assets/1db0a45e-1c0c-4298-bce9-f119d121e7af)
 
-> [!WARNING]
-> If you see an error or the feature doesn't appear, try refreshing the page a few times. I'm using a public API that may require updates in the future with a free server that is not as responsive as premium services, and my knowledge of JavaScript is still very limited and needs further improvement. If you encounter any issues and can fix them, please feel free to make Pull Requests.
-
 > [!IMPORTANT]
 > To use this script, you must have Tampermonkey installed. For more convenience, use AdGuard Desktop; once installed, it can integrate with all browsers without needing to install them one by one.
+
+> [!WARNING]
+> If you see an error or the feature doesn't appear, try refreshing the page a few times. I'm using a public API that may require updates in the future with a free server that is not as responsive as premium services, and my knowledge of JavaScript is still very limited and needs further improvement. If you encounter any issues and can fix them, please feel free to make Pull Requests.
 
 #### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed)
 
@@ -112,24 +112,42 @@ Revealing the video category.
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.
 
+#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+
 ### Channel Stats
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+![chrome_1M5GI53UZa](https://github.com/user-attachments/assets/43caf8b8-b8fa-4be7-8edd-1fa99087b926)
 
 > Channel Stats Page
 
+![chrome_vqPHSJBs7z](https://github.com/user-attachments/assets/b648a214-e813-4e46-a88a-0066a528fcc9)
+
 ### Stream Stats
+
+![chrome_F0gIWRSX9b](https://github.com/user-attachments/assets/13d5d6ae-cc76-4f50-9094-c3cb9258d6ad)
 
 > Stream Stats Page
 
+![chrome_1j2L084007](https://github.com/user-attachments/assets/818ca5cd-b25a-45a1-a13e-46327cbfc61e)
+
 ## 9. YouTube Enhancer (Video Secret Stats)
 
-### Video Stats
+Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.
 
 #### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
 
+### Video Stats
+
+![chrome_dQeNg1kkB2](https://github.com/user-attachments/assets/16e498d2-72c7-4471-b504-6666b8ab62d4)
+
 > Video Stats Page
+
+![chrome_4sfxkRX3PX](https://github.com/user-attachments/assets/f358d5ad-0b22-4e40-ac07-57dbc474070c)
 
 ### Shorts Stats
 
+![chrome_2gTOPvjpwl](https://github.com/user-attachments/assets/795efde4-a494-4693-aa77-dab45dea25e7)
+
 > Shorts Stats Page
+
+![chrome_h1YNQQWdCX](https://github.com/user-attachments/assets/88ecc7e4-90b3-44c9-8187-8ba4f9410999)

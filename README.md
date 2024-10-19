@@ -8,7 +8,7 @@
 
 #### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed)
 
-## YouTube Enhancer (Reveal Channel ID)
+## 1. YouTube Enhancer (Reveal Channel ID)
 
 Revealing the channel ID, displayed next to the channel handle.
 
@@ -16,7 +16,7 @@ Revealing the channel ID, displayed next to the channel handle.
 
 ![chrome_MP0hY92q8z](https://github.com/user-attachments/assets/2a6dd741-1edb-4138-8e29-0145842db0d3)
 
-## YouTube Enhancer (Full-Sized Image Preview)
+## 2. YouTube Enhancer (Full-Sized Image Preview)
 
 Viewing original video thumbnails, avatars, and channel banners, with a thumbnail preview above the panel.
 
@@ -38,13 +38,17 @@ Viewing original video thumbnails, avatars, and channel banners, with a thumbnai
 
 ![chrome_CGYaShi5Xl](https://github.com/user-attachments/assets/dc4b24a2-ab84-4f2a-b5c2-79c801373904)
 
-## YouTube Enhancer (Shorts Thumbnail)
+## 3. YouTube Enhancer (Shorts Thumbnail)
 
 Viewing original video shorts.
 
 #### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
 
-## YouTube Enhancer (Loop & Screenshot Button)
+![chrome_wxuAlkEHZBA](https://github.com/user-attachments/assets/51dd9f4c-fc3c-47be-948d-f4f25f1ab7ed)
+
+![chrome_W0HJMbAJ3cA](https://github.com/user-attachments/assets/4659a79d-15ea-4d5b-8aeb-2e29af83d409)
+
+## 4. YouTube Enhancer (Loop & Screenshot Button)
 
 Integrating loop and screenshot buttons into the video and shorts player to enhance user functionality.
 
@@ -58,7 +62,7 @@ Integrating loop and screenshot buttons into the video and shorts player to enha
 
 ![chrome_vOHT2JqXuc](https://github.com/user-attachments/assets/c336cfae-ec85-4dac-add0-82779f2239c2)
 
-## YouTube Enhancer (Reveal Views & Upload Time)
+## 5. YouTube Enhancer (Reveal Views & Upload Time)
 
 Integrating clickable badges that reveal the total views for all video types and detailed upload times.
 
@@ -66,23 +70,45 @@ Integrating clickable badges that reveal the total views for all video types and
 
 > Compact Mode
 
+![chrome_lApPVpiVB5](https://github.com/user-attachments/assets/988a628b-ecc2-4149-95ba-97f8d10d1217)
+
 > Detail Mode
+
+![chrome_lApPVpiVB4](https://github.com/user-attachments/assets/71c71077-5578-4ee7-98f0-e03b1b6a90c7)
 
 > Shorts Video
 
-## YouTube Enhancer (Extras)
+![chrome_QHVFV5ayfy](https://github.com/user-attachments/assets/f5fdb395-67a7-4247-bac2-26d87257f6d1)
+
+## 6. YouTube Enhancer (Extras)
 
 **Highly recommended.** Addition for the YouTube Enhancer script (Reveal Views & Upload Time).
 
 #### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
 
-## YouTube Enhancer (Reveal Video Category)
+> Before
+
+![chrome_C5oCeD5WAPB](https://github.com/user-attachments/assets/169bf228-d852-4724-ae91-771076929173)
+
+> After
+
+![chrome_C5oCeD5WAP](https://github.com/user-attachments/assets/1a042e33-7ff7-4d45-926c-64a51c556748)
+
+## 7. YouTube Enhancer (Reveal Video Category)
 
 Revealing the video category.
 
 #### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
 
-## YouTube Enhancer (Secret Stats)
+> Videos Page
+
+![image](https://github.com/user-attachments/assets/a3e4cf1b-d769-483a-8db8-d95b5ecff045)
+
+> Shorts Page
+
+![chrome_fsmjq7Ce1c1](https://github.com/user-attachments/assets/04347092-746a-4505-be5d-96850ace30d9)
+
+## 8. YouTube Enhancer (Secret Stats)
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.
 
@@ -92,6 +118,12 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 > Channel Stats Page
 
+### Stream Stats
+
+> Stream Stats Page
+
+## 9. YouTube Enhancer (Video Secret Stats)
+
 ### Video Stats
 
 #### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
@@ -100,12 +132,4 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ### Shorts Stats
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
-
 > Shorts Stats Page
-
-### Stream Stats
-
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
-
-> Stream Stats Page

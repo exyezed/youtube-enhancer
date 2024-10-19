@@ -70,11 +70,11 @@ Integrating clickable badges that reveal the total views for all video types and
 
 > Compact Mode
 
-![chrome_lApPVpiVB5](https://github.com/user-attachments/assets/988a628b-ecc2-4149-95ba-97f8d10d1217)
+![chrome_gRw4d7xfBH1](https://github.com/user-attachments/assets/92d34fad-458f-4cfc-818f-e3a6316fb19d)
 
 > Detail Mode
 
-![chrome_lApPVpiVB4](https://github.com/user-attachments/assets/71c71077-5578-4ee7-98f0-e03b1b6a90c7)
+![chrome_gRw4d7xfBH2](https://github.com/user-attachments/assets/a305e0a7-9cb4-4371-b256-e93980312dc9)
 
 > Shorts Video
 

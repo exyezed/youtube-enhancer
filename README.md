@@ -84,7 +84,7 @@ Integrating clickable badges that reveal the total views for all video types and
 
 **Highly recommended.** Addition for the YouTube Enhancer script (Reveal Views & Upload Time).
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+#### [Install Script](https://update.greasyfork.org/scripts/513153/YouTube%20Enhancer%20%28Extras%29.user.js)
 
 > Before
 
@@ -112,7 +112,7 @@ Revealing the video category.
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+#### [Install Script](https://update.greasyfork.org/scripts/513154/YouTube%20Enhancer%20%28Secret%20Stats%29.user.js)
 
 ### Channel Stats
 
@@ -134,7 +134,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+#### [Install Script](https://update.greasyfork.org/scripts/513155/YouTube%20Enhancer%20%28Video%20Secret%20Stats%29.user.js)
 
 ### Video Stats
 

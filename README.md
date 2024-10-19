@@ -1,5 +1,3 @@
-![Banner](https://github.com/user-attachments/assets/559d2281-f319-4556-8d24-2fa26beec68d)
-
 > [!WARNING]
 > If you see an error or the feature doesn't appear, try refreshing the page a few times. I'm using a public API that may require updates in the future with a free server that is not as responsive as premium services, and my knowledge of JavaScript is still very limited and needs further improvement. If you encounter any issues and can fix them, please feel free to make Pull Requests.
 

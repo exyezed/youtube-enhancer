@@ -1,10 +1,10 @@
 ![Banner](https://github.com/user-attachments/assets/559d2281-f319-4556-8d24-2fa26beec68d)
 
 > [!WARNING]
-> If you're unable to access the data, try reloading the page a few times. I'm using a public API, which may need updates in the future, and a free server that isn't as responsive as premium services.
+> If you see an error or the feature doesn't appear, try refreshing the page a few times. I'm using a public API that may require updates in the future with a free server that is not as responsive as premium services, and my knowledge of JavaScript is still very limited and needs further improvement. If you encounter any issues and can fix them, please feel free to make Pull Requests.
 
 > [!IMPORTANT]
-> To use this script, you need Tampermonkey installed. 
+> To use this script, you must have Tampermonkey installed. For more convenience, use AdGuard Desktop; once installed, it can integrate with all browsers without needing to install them one by one.
 
 #### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed)
 

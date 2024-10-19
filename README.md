@@ -40,7 +40,7 @@ Viewing original video thumbnails, avatars, and channel banners, with a thumbnai
 
 ## 3. YouTube Enhancer (Shorts Thumbnail)
 
-Viewing original video shorts.
+Viewing original shorts thumbnails.
 
 #### [Install Script](https://update.greasyfork.org/scripts/513132/YouTube%20Enhancer%20%28Shorts%20Thumbnail%29.user.js)
 

@@ -42,7 +42,7 @@ Viewing original video thumbnails, avatars, and channel banners, with a thumbnai
 
 Viewing original video shorts.
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+#### [Install Script](https://update.greasyfork.org/scripts/513132/YouTube%20Enhancer%20%28Shorts%20Thumbnail%29.user.js)
 
 ![chrome_wxuAlkEHZBA](https://github.com/user-attachments/assets/51dd9f4c-fc3c-47be-948d-f4f25f1ab7ed)
 
@@ -66,7 +66,7 @@ Integrating loop and screenshot buttons into the video and shorts player to enha
 
 Integrating clickable badges that reveal the total views for all video types and detailed upload times.
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+#### [Install Script](https://update.greasyfork.org/scripts/513133/YouTube%20Enhancer%20%28Reveal%20Views%20%20Upload%20Time%29.user.js)
 
 > Compact Mode
 
@@ -98,7 +98,7 @@ Integrating clickable badges that reveal the total views for all video types and
 
 Revealing the video category.
 
-#### [Coming Soon](https://greasyfork.org/en/users/1382928-exyezed)
+#### [Install Script](https://update.greasyfork.org/scripts/513134/YouTube%20Enhancer%20%28Reveal%20Video%20Category%29.user.js)
 
 > Videos Page
 

@@ -75,11 +75,11 @@
     function addCategoryToShortsTitles() {
         const titleElements = document.querySelectorAll('yt-shorts-video-title-view-model');
         titleElements.forEach(element => {
-            if (!element.querySelector('.YtShortsVideoCategoryViewModelShortsVideoTitle')) {
+            if (!element.querySelector('.YouTubeEnhancerRevealShortsCategory')) {
                 const titleElement = element.querySelector('.YtShortsVideoTitleViewModelShortsVideoTitle');
                 if (titleElement) {
                     const categoryElement = document.createElement('span');
-                    categoryElement.className = 'YtShortsVideoCategoryViewModelShortsVideoTitle';
+                    categoryElement.className = 'YouTubeEnhancerRevealShortsCategory';
                     categoryElement.style.fontWeight = 'bold';
                     categoryElement.style.color = '#fff';
                     titleElement.insertBefore(categoryElement, titleElement.firstChild);
@@ -94,6 +94,26 @@
         });
     }
 
+    function addCategoryToNewShortsTitle() {
+        const reelPlayerHeader = document.querySelector('reel-player-header-renderer');
+        if (reelPlayerHeader) {
+            const titleElement = reelPlayerHeader.querySelector('#stamped-title');
+            if (titleElement && !titleElement.querySelector('.YouTubeEnhancerRevealShortsCategory')) {
+                const categoryElement = document.createElement('span');
+                categoryElement.className = 'YouTubeEnhancerRevealShortsCategory';
+                categoryElement.style.fontWeight = 'bold';
+                categoryElement.style.color = '#fff';
+                categoryElement.style.marginRight = '4px';
+                titleElement.insertBefore(categoryElement, titleElement.firstChild);
+
+                const shortsVideoId = getShortsVideoId();
+                if (shortsVideoId) {
+                    fetchVideoCategory(shortsVideoId, categoryElement, true);
+                }
+            }
+        }
+    }
+
     function getShortsVideoId() {
         const path = window.location.pathname;
         const shortsMatch = path.match(/\/shorts\/([^/?]+)/);
@@ -104,6 +124,7 @@
         const observer = new MutationObserver(() => {
             checkForVideoChange();
             addCategoryToShortsTitles();
+            addCategoryToNewShortsTitle();
         });
 
         observer.observe(document.body, { childList: true, subtree: true });
@@ -112,6 +133,7 @@
     function init() {
         checkForVideoChange();
         addCategoryToShortsTitles();
+        addCategoryToNewShortsTitle();
         observePageChanges();
     }
 

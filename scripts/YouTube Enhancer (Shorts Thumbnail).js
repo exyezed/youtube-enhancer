@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         YouTube Enhancer (Shorts Thumbnail)
-// @description  Viewing original video shorts.
+// @description  Viewing original shorts thumbnails.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
 // @version      1.0
 // @author       exyezed

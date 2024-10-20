@@ -120,7 +120,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 > Channel Stats Page
 
-![chrome_vqPHSJBs7z](https://github.com/user-attachments/assets/b648a214-e813-4e46-a88a-0066a528fcc9)
+![chrome_wfD4sULI8x](https://github.com/user-attachments/assets/fb7be6ee-b0f3-4bfd-b2b0-3f73ef561c85)
 
 ### Stream Stats
 
@@ -128,7 +128,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 > Stream Stats Page
 
-![chrome_1j2L084007](https://github.com/user-attachments/assets/818ca5cd-b25a-45a1-a13e-46327cbfc61e)
+![chrome_ifphTsuNIk](https://github.com/user-attachments/assets/acfb4f11-ec72-4bfd-9859-0c3c0f3dc7a9)
 
 ## 9. YouTube Enhancer (Video Secret Stats)
 
@@ -142,7 +142,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 > Video Stats Page
 
-![chrome_4sfxkRX3PX](https://github.com/user-attachments/assets/f358d5ad-0b22-4e40-ac07-57dbc474070c)
+![chrome_RKujqe6aAF](https://github.com/user-attachments/assets/a6d51256-48a3-451f-a02c-2aeb4a2f1f57)
 
 ### Shorts Stats
 
@@ -150,4 +150,4 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 > Shorts Stats Page
 
-![chrome_h1YNQQWdCX](https://github.com/user-attachments/assets/88ecc7e4-90b3-44c9-8187-8ba4f9410999)
+![chrome_iKPiyDk494](https://github.com/user-attachments/assets/86cba28f-076b-46f2-ae49-7c06961f8c26)

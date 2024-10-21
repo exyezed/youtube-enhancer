@@ -46,8 +46,6 @@ Viewing original shorts thumbnails.
 
 ![chrome_wxuAlkEHZBA](https://github.com/user-attachments/assets/51dd9f4c-fc3c-47be-948d-f4f25f1ab7ed)
 
-![chrome_W0HJMbAJ3cA](https://github.com/user-attachments/assets/4659a79d-15ea-4d5b-8aeb-2e29af83d409)
-
 ## 4. YouTube Enhancer (Loop & Screenshot Button)
 
 Integrating loop and screenshot buttons into the video and shorts player to enhance user functionality.
@@ -142,7 +140,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 > Video Stats Page
 
-![chrome_RKujqe6aAF](https://github.com/user-attachments/assets/a6d51256-48a3-451f-a02c-2aeb4a2f1f57)
+![chrome_bz90yICb3s](https://github.com/user-attachments/assets/16ed2d78-1c0b-4750-b82e-a7b90b8f3270)
 
 ### Shorts Stats
 
@@ -150,4 +148,4 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 > Shorts Stats Page
 
-![chrome_iKPiyDk494](https://github.com/user-attachments/assets/86cba28f-076b-46f2-ae49-7c06961f8c26)
+![chrome_1wwTvpaNmu](https://github.com/user-attachments/assets/e4c31478-61e8-40e3-b265-2c49c89017f0)

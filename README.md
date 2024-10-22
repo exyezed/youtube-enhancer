@@ -106,7 +106,15 @@ Revealing the video category.
 
 ![chrome_fsmjq7Ce1c1](https://github.com/user-attachments/assets/04347092-746a-4505-be5d-96850ace30d9)
 
-## 8. YouTube Enhancer (Secret Stats)
+## 8. YouTube Enhancer (Channel Video Counters)
+
+Automatically counts and displays the total number of videos, shorts, and live streams.
+
+#### [Install Script](https://update.greasyfork.org/scripts/513490/YouTube%20Enhancer%20%28Channel%20Video%20Counters%29.user.js)
+
+![chrome_6lhVLhDdfw](https://github.com/user-attachments/assets/e239eb56-0834-4f5d-820a-851a04acddff)
+
+## 9. YouTube Enhancer (Secret Stats)
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.
 
@@ -128,7 +136,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ![chrome_ifphTsuNIk](https://github.com/user-attachments/assets/acfb4f11-ec72-4bfd-9859-0c3c0f3dc7a9)
 
-## 9. YouTube Enhancer (Video Secret Stats)
+## 10. YouTube Enhancer (Video Secret Stats)
 
 Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.
 

@@ -157,3 +157,11 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 > Shorts Stats Page
 
 ![chrome_1wwTvpaNmu](https://github.com/user-attachments/assets/e4c31478-61e8-40e3-b265-2c49c89017f0)
+
+## 11. YouTube Enhancer (Audio Downloader)
+
+Integrate a high-quality 320kbps audio download button before the video title.
+
+#### [Install Script](https://update.greasyfork.org/scripts/514884/YouTube%20Enhancer%20%28Audio%20Downloader%29.user.js)
+
+![chrome_K2ZDsRQGQT](https://github.com/user-attachments/assets/036faf15-44a4-4df5-b7aa-4b03ac73ad09)

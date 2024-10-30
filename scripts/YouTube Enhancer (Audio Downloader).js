@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Audio Downloader)
 // @description  Integrate a high-quality 320kbps audio download button before the video title.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -80,7 +80,7 @@
             const requestBody = {
                 url: videoUrl,
                 aFormat: "mp3",
-                filenamePattern: "pretty",
+                filenamePattern: "basic",
                 isAudioOnly: true
             };
 

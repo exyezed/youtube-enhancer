@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Display country flags for YouTube channels and videos.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -267,9 +267,9 @@
 
     const processedChannels = new Set();
     const processedVideos = new Set();
-    let currentChannelName = null;
+    let currentChannelIdentifier = null;
     let currentVideoId = null;
-    
+
     function createFlagContainer(countryCode, isChannel) {
         const container = document.createElement('div');
         container.style.marginLeft = '8px';
@@ -289,62 +289,112 @@
         return container;
     }
 
-    function getChannelName() {
-        const channelUrl = window.location.pathname;
-        const match = channelUrl.match(/@([^/]+)/);
-        return match ? match[1] : null;
-    }
+    function getChannelIdentifier() {
+        const path = window.location.pathname;
 
-    function fetchChannelCountryData(channelName) {
-        return new Promise((resolve, reject) => {
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: `https://exyezed.vercel.app/api/channel/${channelName}`,
-                onload: function(response) {
-                    try {
-                        const data = JSON.parse(response.responseText);
-                        resolve(data.country);
-                    } catch (error) {
-                        reject(error);
-                    }
-                },
-                onerror: reject
-            });
-        });
+        if (path.includes('/@')) {
+            const match = path.match(/@([^/]+)/);
+            if (match) {
+                console.log('Found channel handle:', match[1]);
+                return match[1];
+            }
+        }
+
+        if (path.includes('/channel/')) {
+            const match = path.match(/\/channel\/(UC[\w-]+)/);
+            if (match) {
+                console.log('Found channel ID:', match[1]);
+                return match[1];
+            }
+        }
+
+        return null;
     }
 
     function isChannelPage() {
-        return window.location.pathname.includes('/@');
+        const isChannel = window.location.pathname.includes('/@') ||
+                         window.location.pathname.includes('/channel/');
+        console.log('Is channel page:', isChannel);
+        return isChannel;
+    }
+
+    function fetchChannelCountryData(channelIdentifier) {
+        return new Promise((resolve, reject) => {
+            const url = `https://exyezed.vercel.app/api/channel/${channelIdentifier}`;
+            console.log('Fetching data from:', url);
+
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: url,
+                onload: function(response) {
+                    try {
+                        const data = JSON.parse(response.responseText);
+                        console.log('API response:', data);
+                        resolve(data.country);
+                    } catch (error) {
+                        console.error('API parsing error:', error);
+                        reject(error);
+                    }
+                },
+                onerror: function(error) {
+                    console.error('API request error:', error);
+                    reject(error);
+                }
+            });
+        });
     }
 
     async function addChannelFlag() {
         if (!isChannelPage()) return;
 
-        const channelName = getChannelName();
-        if (!channelName || channelName === currentChannelName || processedChannels.has(channelName)) return;
+        const channelIdentifier = getChannelIdentifier();
+        console.log('Current channel identifier:', channelIdentifier);
 
-        currentChannelName = channelName;
-        
+        if (!channelIdentifier || channelIdentifier === currentChannelIdentifier || processedChannels.has(channelIdentifier)) {
+            console.log('Channel already processed or invalid');
+            return;
+        }
+
+        currentChannelIdentifier = channelIdentifier;
+
         const maxAttempts = 10;
         let attempts = 0;
-        
+
         const waitForChannelName = async () => {
-            const channelNameContainer = document.querySelector('.yt-core-attributed-string--white-space-pre-wrap');
-            
+            const selectors = [
+                '.yt-core-attributed-string--white-space-pre-wrap',
+                '#channel-name',
+                '#text.ytd-channel-name',
+                'ytd-channel-name',
+                'h1.style-scope.ytd-channel-header-renderer'
+            ];
+
+            const channelNameContainer = selectors.map(selector =>
+                document.querySelector(selector)).find(el => el);
+
             if (channelNameContainer) {
+                console.log('Found channel name container:', channelNameContainer);
                 const existingFlag = channelNameContainer.querySelector('.country-flag-container');
-                if (existingFlag) existingFlag.remove();
+                if (existingFlag) {
+                    console.log('Removing existing flag');
+                    existingFlag.remove();
+                }
 
                 try {
-                    const country = await fetchChannelCountryData(channelName);
-                    if (!country || country === 'Unknown') return;
+                    const country = await fetchChannelCountryData(channelIdentifier);
+                    console.log('Received country:', country);
+
+                    if (!country || country === 'Unknown') {
+                        console.log('Invalid country data');
+                        return;
+                    }
 
                     const verificationBadge = channelNameContainer.querySelector('.yt-core-attributed-string--inline-block-mod');
-                    
+
                     const flagContainer = createFlagContainer(country, true);
                     flagContainer.classList.add('country-flag-container');
                     flagContainer.style.display = 'inline-flex';
-                    
+
                     if (verificationBadge) {
                         verificationBadge.parentNode.insertBefore(flagContainer, verificationBadge.nextSibling);
                     } else {
@@ -357,13 +407,17 @@
                         flagContainer.remove();
                     };
 
-                    processedChannels.add(channelName);
+                    processedChannels.add(channelIdentifier);
+                    console.log('Successfully added flag for:', channelIdentifier);
                 } catch (error) {
-                    console.error('Error fetching channel country data:', error);
+                    console.error('Error in flag addition process:', error);
                 }
             } else if (attempts < maxAttempts) {
                 attempts++;
-                setTimeout(waitForChannelName, 500);
+                console.log(`Attempt ${attempts} - Waiting for channel name container`);
+                setTimeout(waitForChannelName, 1000);
+            } else {
+                console.log('Max attempts reached - Could not find channel name container');
             }
         };
 
@@ -373,12 +427,12 @@
     function getVideoId() {
         const urlParams = new URLSearchParams(window.location.search);
         const videoId = urlParams.get('v');
-        
+
         if (!videoId) {
             const videoElement = document.querySelector('ytd-watch-flexy');
             return videoElement?.getAttribute('video-id') || null;
         }
-        
+
         return videoId;
     }
 
@@ -401,7 +455,7 @@
     }
 
     function isVideoPage() {
-        return window.location.pathname === '/watch' || 
+        return window.location.pathname === '/watch' ||
                document.querySelector('ytd-watch-flexy') !== null;
     }
 
@@ -412,13 +466,13 @@
         if (!videoId || videoId === currentVideoId) return;
 
         currentVideoId = videoId;
-        
+
         const maxAttempts = 10;
         let attempts = 0;
-        
+
         const waitForTitle = async () => {
             const titleContainer = document.querySelector('h1.style-scope.ytd-watch-metadata');
-            
+
             if (titleContainer) {
                 const existingFlag = titleContainer.querySelector('.country-flag-container');
                 if (existingFlag) existingFlag.remove();
@@ -455,11 +509,13 @@
 
     function setupObservers() {
         let lastUrl = location.href;
+
         new MutationObserver(() => {
             const currentUrl = location.href;
             if (currentUrl !== lastUrl) {
+                console.log('URL changed from', lastUrl, 'to', currentUrl);
                 lastUrl = currentUrl;
-                currentChannelName = null;
+                currentChannelIdentifier = null;
                 currentVideoId = null;
                 setTimeout(() => {
                     addChannelFlag();
@@ -470,8 +526,8 @@
 
         const contentObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
-                if (mutation.target.id === 'content' || 
-                    mutation.target.id === 'primary' || 
+                if (mutation.target.id === 'content' ||
+                    mutation.target.id === 'primary' ||
                     mutation.target.id === 'player') {
                     setTimeout(() => {
                         addChannelFlag();
@@ -494,6 +550,7 @@
     }
 
     function init() {
+        console.log('Initializing YouTube Enhancer');
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 setupObservers();

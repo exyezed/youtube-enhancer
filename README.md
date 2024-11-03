@@ -114,13 +114,19 @@ Automatically counts and displays the total number of videos, shorts, and live s
 
 ![chrome_6lhVLhDdfw](https://github.com/user-attachments/assets/e239eb56-0834-4f5d-820a-851a04acddff)
 
-## 9. YouTube Enhancer (Video Country Flag)
+## 9. YouTube Enhancer (Reveal Country Flag)
 
-Display country information and a flag icon after the video title.
+Display country flags for YouTube channels and videos.
 
-#### [Install Script](https://update.greasyfork.org/scripts/515505/YouTube%20Enhancer%20%28Video%20Country%20Flag%29.user.js)
+#### [Install Script](https://update.greasyfork.org/scripts/515505/YouTube%20Enhancer%20%28Reveal%20Country%20Flag%29.user.js)
 
-![looH9SJK7V](https://github.com/user-attachments/assets/ef2b163a-9a0c-45d7-9dd3-5c0ec16b4cef)
+> Channel Page
+
+![image](https://github.com/user-attachments/assets/106b0147-623b-4ee5-9129-5945560ac18c)
+
+> Video Page
+
+![image](https://github.com/user-attachments/assets/5276b057-2ae7-429c-bb8c-3aac5441f54d)
 
 ## 10. YouTube Enhancer (Secret Stats)
 

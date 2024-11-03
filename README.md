@@ -114,7 +114,15 @@ Automatically counts and displays the total number of videos, shorts, and live s
 
 ![chrome_6lhVLhDdfw](https://github.com/user-attachments/assets/e239eb56-0834-4f5d-820a-851a04acddff)
 
-## 9. YouTube Enhancer (Secret Stats)
+## 9. YouTube Enhancer (Video Country Flag)
+
+Display country information and a flag icon after the video title.
+
+#### [Install Script](https://update.greasyfork.org/scripts/515505/YouTube%20Enhancer%20%28Video%20Country%20Flag%29.user.js)
+
+![looH9SJK7V](https://github.com/user-attachments/assets/ef2b163a-9a0c-45d7-9dd3-5c0ec16b4cef)
+
+## 10. YouTube Enhancer (Secret Stats)
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.
 
@@ -136,7 +144,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ![chrome_ifphTsuNIk](https://github.com/user-attachments/assets/acfb4f11-ec72-4bfd-9859-0c3c0f3dc7a9)
 
-## 10. YouTube Enhancer (Video Secret Stats)
+## 11. YouTube Enhancer (Video Secret Stats)
 
 Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.
 

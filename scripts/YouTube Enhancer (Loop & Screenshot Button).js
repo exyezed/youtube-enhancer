@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Loop & Screenshot Button)
 // @description  Integrating loop and screenshot buttons into the video and shorts player to enhance user functionality.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.1
+// @version      1.2
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -18,74 +18,133 @@
     const YouTubeEnhancerLoopScreenshotConfig = {
         screenshotFormat: "png",
         extension: 'png',
-        screenshotFunctionality: 2 // 0: download, 1: clipboard, 2: both
+        screenshotFunctionality: 2, // 0: download, 1: clipboard, 2: both
+        clickDuration: 200
     };
 
     // CSS Styles
     const YouTubeEnhancerLoopScreenshotCSS = `
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+    a.YouTubeEnhancerLoopScreenshot-loop-button, 
+    a.YouTubeEnhancerLoopScreenshot-screenshot-button {
+        text-align: center;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+    }
 
-        a.YouTubeEnhancerLoopScreenshot-loop-button, a.YouTubeEnhancerLoopScreenshot-screenshot-button {
-            text-align: center;
-        }
+    a.YouTubeEnhancerLoopScreenshot-loop-button svg, 
+    a.YouTubeEnhancerLoopScreenshot-screenshot-button svg {
+        width: 24px;
+        height: 24px;
+        vertical-align: middle;
+    }
 
-        a.YouTubeEnhancerLoopScreenshot-loop-button svg, a.YouTubeEnhancerLoopScreenshot-screenshot-button svg {
-            margin-bottom: 2px;
-            width: 52%;
-            vertical-align: middle;
-        }
+    a.YouTubeEnhancerLoopScreenshot-loop-button.active svg {
+        fill: url(#buttonGradient);
+    }
 
-        a.YouTubeEnhancerLoopScreenshot-loop-button.active svg {
-            fill: url(#buttonGradient);
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+    }
 
-        a.YouTubeEnhancerLoopScreenshot-screenshot-button.clicked svg {
-            fill: url(#buttonGradient);
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button .icon-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 24px;
+        height: 24px;
+    }
 
-        .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 16px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button .default-icon,
+    .YouTubeEnhancerLoopScreenshot-screenshot-button .hover-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transition: opacity 0.2s ease;
+    }
 
-        .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button .material-symbols-outlined {
-            font-size: 24px;
-            font-variation-settings: 'FILL' 1;
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button .default-icon {
+        opacity: 1;
+    }
 
-        /* Theme-specific styles */
-        html[dark] .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button .hover-icon {
+        opacity: 0;
+    }
 
-        html[dark] .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button:hover .default-icon {
+        opacity: 0;
+    }
 
-        html[dark] .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button .material-symbols-outlined {
-            color: white;
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button:hover .hover-icon {
+        opacity: 1;
+    }
 
-        html:not([dark]) .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
+    .YouTubeEnhancerLoopScreenshot-screenshot-button.clicked .hover-icon {
+        fill: url(#buttonGradient);
+    }
 
-        html:not([dark]) .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
+    .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
 
-        html:not([dark]) .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button .material-symbols-outlined {
-            color: #030303;
-        }
+    .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button svg {
+        width: 24px;
+        height: 24px;
+        transition: fill 0.1s ease;
+    }
+
+    .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button svg path {
+        transition: fill 0.1s ease;
+    }
+
+    .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button.clicked svg path {
+        fill: url(#shortsButtonGradient) !important;
+    }
+
+    html[dark] .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    html[dark] .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    html[dark] .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button svg path {
+        fill: white;
+    }
+
+    html:not([dark]) .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    html:not([dark]) .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    html:not([dark]) .YouTubeEnhancerLoopScreenshot-shorts-screenshot-button svg path {
+        fill: #030303;
+    }
     `;
-
+    
     // Utility Functions
     const YouTubeEnhancerLoopScreenshotUtils = {
         addStyle(styleString) {
@@ -102,7 +161,6 @@
             svg.setAttribute('width', '24px');
             svg.setAttribute('fill', '#e8eaed');
             
-            // Add gradient definition
             const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
             const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
             gradient.setAttribute('id', 'buttonGradient');
@@ -132,14 +190,17 @@
         },
 
         getYouTubeVideoScreenshotSVG() {
+            const container = document.createElement('div');
+            container.className = 'icon-container';
+            
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
             svg.setAttribute('height', '24px');
             svg.setAttribute('viewBox', '0 -960 960 960');
             svg.setAttribute('width', '24px');
             svg.setAttribute('fill', '#e8eaed');
+            svg.classList.add('default-icon');
             
-            // Add gradient definition
             const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
             const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
             gradient.setAttribute('id', 'buttonGradient');
@@ -163,6 +224,58 @@
             
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('d', 'M240-280h480L570-480 450-320l-90-120-120 160Zm-80 160q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z');
+            svg.appendChild(path);
+    
+            const hoverSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            hoverSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            hoverSvg.setAttribute('height', '24px');
+            hoverSvg.setAttribute('viewBox', '0 0 24 24');
+            hoverSvg.setAttribute('width', '24px');
+            hoverSvg.setAttribute('fill', '#e8eaed');
+            hoverSvg.classList.add('hover-icon');
+    
+            const hoverPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            hoverPath.setAttribute('d', 'M20 5h-3.17l-1.24-1.35A2 2 0 0 0 14.12 3H9.88c-.56 0-1.1.24-1.47.65L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m-3 12H7a.5.5 0 0 1-.4-.8l2-2.67c.2-.27.6-.27.8 0L11.25 16l2.6-3.47c.2-.27.6-.27.8 0l2.75 3.67a.5.5 0 0 1-.4.8');
+    
+            hoverSvg.appendChild(defs.cloneNode(true));
+            hoverSvg.appendChild(hoverPath);
+    
+            container.appendChild(svg);
+            container.appendChild(hoverSvg);
+            
+            return container;
+        },
+
+        getShortsScreenshotSVG() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            svg.setAttribute('height', '24px');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('width', '24px');
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+            gradient.setAttribute('id', 'shortsButtonGradient');
+            gradient.setAttribute('x1', '0%');
+            gradient.setAttribute('y1', '0%');
+            gradient.setAttribute('x2', '100%');
+            gradient.setAttribute('y2', '100%');
+            
+            const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop1.setAttribute('offset', '0%');
+            stop1.setAttribute('style', 'stop-color:#f03');
+            
+            const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop2.setAttribute('offset', '100%');
+            stop2.setAttribute('style', 'stop-color:#ff2791');
+            
+            gradient.appendChild(stop1);
+            gradient.appendChild(stop2);
+            defs.appendChild(gradient);
+            svg.appendChild(defs);
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M20 5h-3.17l-1.24-1.35A2 2 0 0 0 14.12 3H9.88c-.56 0-1.1.24-1.47.65L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m-3 12H7a.5.5 0 0 1-.4-.8l2-2.67c.2-.27.6-.27.8 0L11.25    16l2.6-3.47c.2-.27.6-.27.8 0l2.75 3.67a.5.5 0 0 1-.4.8');
             
             svg.appendChild(path);
             return svg;
@@ -218,6 +331,30 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        },
+
+        captureScreenshot(player) {
+            if (!player) return;
+            
+            const canvas = document.createElement("canvas");
+            canvas.width = player.videoWidth;
+            canvas.height = player.videoHeight;
+            canvas.getContext('2d').drawImage(player, 0, 0, canvas.width, canvas.height);
+            
+            this.getVideoTitle((title) => {
+                const time = player.currentTime;
+                const filename = `${title} ${this.formatTime(time)}.${YouTubeEnhancerLoopScreenshotConfig.extension}`;
+                
+                canvas.toBlob(async (blob) => {
+                    const { screenshotFunctionality } = YouTubeEnhancerLoopScreenshotConfig;
+                    if (screenshotFunctionality >= 1) {
+                        await this.copyToClipboard(blob);
+                    }
+                    if (screenshotFunctionality !== 1) {
+                        this.downloadScreenshot(blob, filename);
+                    }
+                }, `image/${YouTubeEnhancerLoopScreenshotConfig.screenshotFormat}`);
+            });
         }
     };
 
@@ -296,33 +433,10 @@
             button.classList.add('clicked');
             setTimeout(() => {
                 button.classList.remove('clicked');
-            }, 100);
+            }, YouTubeEnhancerLoopScreenshotConfig.clickDuration);
 
-            YouTubeEnhancerLoopScreenshotRegularVideo.captureScreenshot();
-        },
-
-        captureScreenshot() {
             const player = document.querySelector('video');
-            if (!player) return;
-
-            const canvas = document.createElement("canvas");
-            canvas.width = player.videoWidth;
-            canvas.height = player.videoHeight;
-            canvas.getContext('2d').drawImage(player, 0, 0, canvas.width, canvas.height);
-
-            YouTubeEnhancerLoopScreenshotUtils.getVideoTitle((title) => {
-                const time = player.currentTime;
-                const filename = `${title} ${YouTubeEnhancerLoopScreenshotUtils.formatTime(time)}.${YouTubeEnhancerLoopScreenshotConfig.extension}`;
-
-                canvas.toBlob(async (blob) => {
-                    if (YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 1 || YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 2) {
-                        await YouTubeEnhancerLoopScreenshotUtils.copyToClipboard(blob);
-                    }
-                    if (YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 0 || YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 2) {
-                        YouTubeEnhancerLoopScreenshotUtils.downloadScreenshot(blob, filename);
-                    }
-                }, `image/${YouTubeEnhancerLoopScreenshotConfig.screenshotFormat}`);
-            });
+            YouTubeEnhancerLoopScreenshotUtils.captureScreenshot(player);
         }
     };
 
@@ -331,20 +445,13 @@
         init() {
             this.insertScreenshotElement();
         },
-
+    
         insertScreenshotElement() {
             const shortsContainer = document.querySelector('ytd-reel-video-renderer[is-active] #actions');
             if (shortsContainer && !shortsContainer.querySelector('.YouTubeEnhancerLoopScreenshot-shorts-screenshot-button')) {
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'YouTubeEnhancerLoopScreenshot-shorts-screenshot-button';
-
-                const iconSpan = document.createElement('span');
-                iconSpan.className = 'material-symbols-outlined';
-                iconSpan.textContent = 
-
- 'photo_camera_back';
-
-                iconDiv.appendChild(iconSpan);
+                iconDiv.appendChild(YouTubeEnhancerLoopScreenshotUtils.getShortsScreenshotSVG());
                 
                 const customShortsIcon = shortsContainer.querySelector('#custom-shorts-icon');
                 if (customShortsIcon) {
@@ -352,33 +459,31 @@
                 } else {
                     shortsContainer.insertBefore(iconDiv, shortsContainer.firstChild);
                 }
-
-                iconDiv.addEventListener('click', () => this.captureScreenshot());
+    
+                iconDiv.addEventListener('click', (event) => {
+                    const button = event.currentTarget;
+                    button.classList.add('clicked');
+                    
+                    const path = button.querySelector('svg path');
+                    if (path) {
+                        path.style.fill = 'url(#shortsButtonGradient)';
+                    }
+                    
+                    setTimeout(() => {
+                        button.classList.remove('clicked');
+                        if (path) {
+                            path.style.fill = '';
+                        }
+                    }, YouTubeEnhancerLoopScreenshotConfig.clickDuration);
+                    
+                    this.captureScreenshot();
+                });
             }
         },
 
         captureScreenshot() {
             const player = document.querySelector('ytd-reel-video-renderer[is-active] video');
-            if (!player) return;
-
-            const canvas = document.createElement("canvas");
-            canvas.width = player.videoWidth;
-            canvas.height = player.videoHeight;
-            canvas.getContext('2d').drawImage(player, 0, 0, canvas.width, canvas.height);
-
-            YouTubeEnhancerLoopScreenshotUtils.getVideoTitle((title) => {
-                const time = player.currentTime;
-                const filename = `${title} ${YouTubeEnhancerLoopScreenshotUtils.formatTime(time)}.${YouTubeEnhancerLoopScreenshotConfig.extension}`;
-
-                canvas.toBlob(async (blob) => {
-                    if (YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 1 || YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 2) {
-                        await YouTubeEnhancerLoopScreenshotUtils.copyToClipboard(blob);
-                    }
-                    if (YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 0 || YouTubeEnhancerLoopScreenshotConfig.screenshotFunctionality === 2) {
-                        YouTubeEnhancerLoopScreenshotUtils.downloadScreenshot(blob, filename);
-                    }
-                }, `image/${YouTubeEnhancerLoopScreenshotConfig.screenshotFormat}`);
-            });
+            YouTubeEnhancerLoopScreenshotUtils.captureScreenshot(player);
         }
     };
 
@@ -395,7 +500,7 @@
         },
 
         addObserver() {
-            const observer = new MutationObserver(this.updateStyles);
+            const observer = new MutationObserver(() => this.updateStyles());
             observer.observe(document.documentElement, {
                 attributes: true,
                 attributeFilter: ['dark']
@@ -406,11 +511,15 @@
     // Main Initialization
     function YouTubeEnhancerLoopScreenshotInit() {
         YouTubeEnhancerLoopScreenshotUtils.addStyle(YouTubeEnhancerLoopScreenshotCSS);
-        setTimeout(YouTubeEnhancerLoopScreenshotVideoElementPresent() ? YouTubeEnhancerLoopScreenshotInitializeFeatures : YouTubeEnhancerLoopScreenshotInit, 500);
+        initializeWhenReady();
     }
 
-    function YouTubeEnhancerLoopScreenshotVideoElementPresent() {
-        return document.querySelector('video') !== null;
+    function initializeWhenReady() {
+        if (document.querySelector('video')) {
+            YouTubeEnhancerLoopScreenshotInitializeFeatures();
+        } else {
+            setTimeout(initializeWhenReady, 500);
+        }
     }
 
     function YouTubeEnhancerLoopScreenshotInitializeFeatures() {
@@ -446,5 +555,5 @@
 
     // Initialize
     YouTubeEnhancerLoopScreenshotInit();
-    console.log('YouTubeEnhancerLoopScreenshot: Enjoy the awesome music and capture your favorite moments!');
+    console.log('YouTube Enhancer (Loop & Screenshot Button) is running');
 })();

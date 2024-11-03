@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         YouTube Enhancer (Video Country Flag)
-// @description  Display country flag for YouTube videos.
+// @name         YouTube Enhancer (Reveal Country Flag)
+// @description  Display country flags for YouTube channels and videos.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.1
+// @version      1.0
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -265,26 +265,109 @@
         'ZW': 'Zimbabwe'
     };
 
+    const processedChannels = new Set();
     const processedVideos = new Set();
+    let currentChannelName = null;
     let currentVideoId = null;
     
-    function createFlagContainer(countryCode) {
+    function createFlagContainer(countryCode, isChannel) {
         const container = document.createElement('div');
         container.style.marginLeft = '8px';
         container.style.display = 'flex';
         container.style.alignItems = 'center';
+        container.style.padding = '4px';
 
         const flagImg = document.createElement('img');
         flagImg.src = `https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${countryCode.toLowerCase()}.svg`;
-        flagImg.style.width = '20px';
+        flagImg.style.width = isChannel ? '26px' : '20px';
         flagImg.style.height = 'auto';
-        flagImg.style.borderRadius = '2px';
         flagImg.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
         flagImg.style.cursor = 'pointer';
 
         container.appendChild(flagImg);
         container.setAttribute('title', countryNames[countryCode] || countryCode);
         return container;
+    }
+
+    function getChannelName() {
+        const channelUrl = window.location.pathname;
+        const match = channelUrl.match(/@([^/]+)/);
+        return match ? match[1] : null;
+    }
+
+    function fetchChannelCountryData(channelName) {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: `https://exyezed.vercel.app/api/channel/${channelName}`,
+                onload: function(response) {
+                    try {
+                        const data = JSON.parse(response.responseText);
+                        resolve(data.country);
+                    } catch (error) {
+                        reject(error);
+                    }
+                },
+                onerror: reject
+            });
+        });
+    }
+
+    function isChannelPage() {
+        return window.location.pathname.includes('/@');
+    }
+
+    async function addChannelFlag() {
+        if (!isChannelPage()) return;
+
+        const channelName = getChannelName();
+        if (!channelName || channelName === currentChannelName || processedChannels.has(channelName)) return;
+
+        currentChannelName = channelName;
+        
+        const maxAttempts = 10;
+        let attempts = 0;
+        
+        const waitForChannelName = async () => {
+            const channelNameContainer = document.querySelector('.yt-core-attributed-string--white-space-pre-wrap');
+            
+            if (channelNameContainer) {
+                const existingFlag = channelNameContainer.querySelector('.country-flag-container');
+                if (existingFlag) existingFlag.remove();
+
+                try {
+                    const country = await fetchChannelCountryData(channelName);
+                    if (!country || country === 'Unknown') return;
+
+                    const verificationBadge = channelNameContainer.querySelector('.yt-core-attributed-string--inline-block-mod');
+                    
+                    const flagContainer = createFlagContainer(country, true);
+                    flagContainer.classList.add('country-flag-container');
+                    flagContainer.style.display = 'inline-flex';
+                    
+                    if (verificationBadge) {
+                        verificationBadge.parentNode.insertBefore(flagContainer, verificationBadge.nextSibling);
+                    } else {
+                        channelNameContainer.appendChild(flagContainer);
+                    }
+
+                    const flagImg = flagContainer.querySelector('img');
+                    flagImg.onerror = () => {
+                        console.error('Error loading flag icon');
+                        flagContainer.remove();
+                    };
+
+                    processedChannels.add(channelName);
+                } catch (error) {
+                    console.error('Error fetching channel country data:', error);
+                }
+            } else if (attempts < maxAttempts) {
+                attempts++;
+                setTimeout(waitForChannelName, 500);
+            }
+        };
+
+        waitForChannelName();
     }
 
     function getVideoId() {
@@ -299,7 +382,7 @@
         return videoId;
     }
 
-    function fetchCountryData(videoId) {
+    function fetchVideoCountryData(videoId) {
         return new Promise((resolve, reject) => {
             GM_xmlhttpRequest({
                 method: 'GET',
@@ -322,7 +405,7 @@
                document.querySelector('ytd-watch-flexy') !== null;
     }
 
-    async function addCountryFlag() {
+    async function addVideoFlag() {
         if (!isVideoPage()) return;
 
         const videoId = getVideoId();
@@ -341,13 +424,13 @@
                 if (existingFlag) existingFlag.remove();
 
                 try {
-                    const country = await fetchCountryData(videoId);
+                    const country = await fetchVideoCountryData(videoId);
                     if (!country || country === 'Unknown') return;
 
                     titleContainer.style.display = 'flex';
                     titleContainer.style.alignItems = 'center';
 
-                    const flagContainer = createFlagContainer(country);
+                    const flagContainer = createFlagContainer(country, false);
                     flagContainer.classList.add('country-flag-container');
                     titleContainer.appendChild(flagContainer);
 
@@ -359,7 +442,7 @@
 
                     processedVideos.add(videoId);
                 } catch (error) {
-                    console.error('Error fetching country data:', error);
+                    console.error('Error fetching video country data:', error);
                 }
             } else if (attempts < maxAttempts) {
                 attempts++;
@@ -376,17 +459,24 @@
             const currentUrl = location.href;
             if (currentUrl !== lastUrl) {
                 lastUrl = currentUrl;
+                currentChannelName = null;
                 currentVideoId = null;
-                setTimeout(addCountryFlag, 1000);
+                setTimeout(() => {
+                    addChannelFlag();
+                    addVideoFlag();
+                }, 1000);
             }
         }).observe(document, {subtree: true, childList: true});
 
-        const videoPlayerObserver = new MutationObserver((mutations) => {
+        const contentObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 if (mutation.target.id === 'content' || 
                     mutation.target.id === 'primary' || 
                     mutation.target.id === 'player') {
-                    setTimeout(addCountryFlag, 1000);
+                    setTimeout(() => {
+                        addChannelFlag();
+                        addVideoFlag();
+                    }, 1000);
                     break;
                 }
             }
@@ -394,7 +484,7 @@
 
         const observeTarget = document.querySelector('#content, #primary, #player');
         if (observeTarget) {
-            videoPlayerObserver.observe(observeTarget, {
+            contentObserver.observe(observeTarget, {
                 childList: true,
                 subtree: true,
                 attributes: true,
@@ -403,19 +493,20 @@
         }
     }
 
-    // Initialize
     function init() {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 setupObservers();
-                addCountryFlag();
+                addChannelFlag();
+                addVideoFlag();
             });
         } else {
             setupObservers();
-            addCountryFlag();
+            addChannelFlag();
+            addVideoFlag();
         }
     }
 
     init();
-    console.log('YouTube Enhancer (Video Country Flag) is running with enhanced detection');
+    console.log('YouTube Enhancer (Reveal Country Flag) is running');
 })();

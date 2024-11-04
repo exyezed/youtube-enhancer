@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Shorts Thumbnail)
 // @description  Viewing original shorts thumbnails.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -14,19 +14,35 @@
 (function() {
     'use strict';
 
-    // Configuration
-    const BUTTON_SIZE = '24px';  // Adjust this value to change button size
-    const ICON_SIZE = '20px';    // Adjust this value to change icon size
+    const BUTTON_SIZE = '24px';
+    const ICON_SIZE = '20px';
 
-    // Function to extract video ID from href
+    function createSVGIcon(isHoverIcon = false) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        
+        svg.setAttribute("width", "1em");
+        svg.setAttribute("height", "1em");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        
+        path.setAttribute("fill", "currentColor");
+        
+        if (isHoverIcon) {
+            path.setAttribute("d", "M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8zM5 19l3-4l2 3l3-4l4 5z");
+        } else {
+            path.setAttribute("d", "M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4z");
+        }
+        
+        svg.appendChild(path);
+        return svg;
+    }
+
     function getVideoId(href) {
         const match = href.match(/\/shorts\/([^/?]+)/);
         return match ? match[1] : null;
     }
 
-    // Function to create and insert thumbnail button
     function addThumbnailButton(container) {
-        // Check if button already exists
         if (container.querySelector('.YouTubeEnhancerShortsThumbnail')) {
             return;
         }
@@ -37,15 +53,16 @@
         const videoId = getVideoId(linkElement.href);
         if (!videoId) return;
 
-        // Create button
         const button = document.createElement('button');
         button.className = 'YouTubeEnhancerShortsThumbnail';
         
-        // Create and append the Material Symbols icon
-        const icon = document.createElement('span');
-        icon.className = 'material-symbols-outlined';
-        icon.textContent = 'add_photo_alternate';
-        button.appendChild(icon);
+        const iconContainer = document.createElement('span');
+        iconContainer.className = 'youtube-enhancer-icon';
+        
+        const defaultIcon = createSVGIcon(false);
+        iconContainer.appendChild(defaultIcon);
+        
+        button.appendChild(iconContainer);
         
         button.style.cssText = `
             position: absolute;
@@ -65,33 +82,33 @@
             padding: 0;
         `;
 
-        // Style the icon
-        icon.style.cssText = `
-            font-size: ${ICON_SIZE};
-        `;
+        button.addEventListener('mouseenter', () => {
+            iconContainer.removeChild(iconContainer.firstChild);
+            iconContainer.appendChild(createSVGIcon(true));
+        });
 
-        // Add click event
+        button.addEventListener('mouseleave', () => {
+            iconContainer.removeChild(iconContainer.firstChild);
+            iconContainer.appendChild(createSVGIcon(false));
+        });
+
         button.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             window.open(`https://i.ytimg.com/vi/${videoId}/oardefault.jpg`, '_blank');
         });
 
-        // Insert button
         container.insertBefore(button, linkElement);
     }
 
-    // Function to handle new elements being added to the page
     function observeNewElements() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { // Element node
-                        // Check for shorts container in added node
+                    if (node.nodeType === 1) {
                         const containers = node.querySelectorAll('ytm-shorts-lockup-view-model.ShortsLockupViewModelHost');
                         containers.forEach(addThumbnailButton);
                         
-                        // Check if node itself is a shorts container
                         if (node.matches('ytm-shorts-lockup-view-model.ShortsLockupViewModelHost')) {
                             addThumbnailButton(node);
                         }
@@ -106,33 +123,30 @@
         });
     }
 
-    // Function to add necessary styles and font link
     function addStyles() {
         const style = document.createElement('style');
         style.textContent = `
-            .material-symbols-outlined {
-                font-variation-settings:
-                'FILL' 0,
-                'wght' 200,
-                'GRAD' 0,
-                'opsz' 24
-            }
             .YouTubeEnhancerShortsThumbnail {
                 transition: background-color 0.3s ease;
             }
             .YouTubeEnhancerShortsThumbnail:hover {
                 background-color: rgba(0, 0, 0, 0.75) !important;
             }
+            .youtube-enhancer-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: ${ICON_SIZE};
+                height: ${ICON_SIZE};
+            }
+            .youtube-enhancer-icon svg {
+                width: 100%;
+                height: 100%;
+            }
         `;
         document.head.appendChild(style);
-
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=aspect_ratio';
-        document.head.appendChild(link);
     }
 
-    // Initial setup for existing elements
     function initialize() {
         addStyles();
         const containers = document.querySelectorAll('ytm-shorts-lockup-view-model.ShortsLockupViewModelHost');
@@ -140,10 +154,10 @@
         observeNewElements();
     }
 
-    // Run on page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initialize);
     } else {
         initialize();
     }
+    console.log('YouTube Enhancer (Shorts Thumbnail) is running');
 })();

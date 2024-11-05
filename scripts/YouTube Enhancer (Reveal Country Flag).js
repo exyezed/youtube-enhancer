@@ -1,278 +1,239 @@
 // ==UserScript==
 // @name         YouTube Enhancer (Reveal Country Flag)
-// @description  Display country flags for YouTube channels and videos.
+// @description  Display country flags for YouTube channels, videos and shorts.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
 // @license      MIT
 // @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
-// @connect      exyezed.vercel.app
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    const countryNames = {
-        'AF': 'Afghanistan', 'AL': 'Albania', 'DZ': 'Algeria', 'AS': 'American Samoa', 'AD': 'Andorra', 'AO': 'Angola', 'AI': 'Anguilla', 'AQ': 'Antarctica', 'AG': 'Antigua and Barbuda', 'AR': 'Argentina', 'AM': 'Armenia', 'AW': 'Aruba', 'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan', 'BS': 'Bahamas', 'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BY': 'Belarus', 'BE': 'Belgium', 'BZ': 'Belize', 'BJ': 'Benin', 'BM': 'Bermuda', 'BT': 'Bhutan', 'BO': 'Bolivia', 'BQ': 'Bonaire, Sint Eustatius and Saba', 'BA': 'Bosnia and Herzegovina', 'BW': 'Botswana', 'BV': 'Bouvet Island', 'BR': 'Brazil', 'IO': 'British Indian Ocean Territory', 'BN': 'Brunei Darussalam', 'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi', 'CV': 'Cabo Verde', 'KH': 'Cambodia', 'CM': 'Cameroon', 'CA': 'Canada', 'KY': 'Cayman Islands', 'CF': 'Central African Republic', 'TD': 'Chad', 'CL': 'Chile', 'CN': 'China', 'CX': 'Christmas Island', 'CC': 'Cocos Islands', 'CO': 'Colombia', 'KM': 'Comoros', 'CG': 'Congo', 'CD': 'Congo, Democratic Republic of the', 'CK': 'Cook Islands', 'CR': 'Costa Rica', 'HR': 'Croatia', 'CU': 'Cuba', 'CW': 'Curaçao', 'CY': 'Cyprus', 'CZ': 'Czechia', 'DK': 'Denmark', 'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic', 'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea', 'ER': 'Eritrea', 'EE': 'Estonia', 'SZ': 'Eswatini', 'ET': 'Ethiopia', 'FK': 'Falkland Islands', 'FO': 'Faroe Islands', 'FJ': 'Fiji', 'FI': 'Finland', 'FR': 'France', 'GF': 'French Guiana', 'PF': 'French Polynesia', 'TF': 'French Southern Territories', 'GA': 'Gabon', 'GM': 'Gambia', 'GE': 'Georgia', 'DE': 'Germany', 'GH': 'Ghana', 'GI': 'Gibraltar', 'GR': 'Greece', 'GL': 'Greenland', 'GD': 'Grenada', 'GP': 'Guadeloupe', 'GU': 'Guam', 'GT': 'Guatemala', 'GG': 'Guernsey', 'GN': 'Guinea', 'GW': 'Guinea-Bissau', 'GY': 'Guyana', 'HT': 'Haiti', 'HM': 'Heard Island and McDonald Islands', 'VA': 'Holy See', 'HN': 'Honduras', 'HK': 'Hong Kong', 'HU': 'Hungary', 'IS': 'Iceland', 'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq', 'IE': 'Ireland', 'IM': 'Isle of Man', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica', 'JP': 'Japan', 'JE': 'Jersey', 'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya', 'KI': 'Kiribati', 'KP': 'North Korea', 'KR': 'South Korea', 'KW': 'Kuwait', 'KG': 'Kyrgyzstan', 'LA': 'Lao People\'s Democratic Republic', 'LV': 'Latvia', 'LB': 'Lebanon', 'LS': 'Lesotho', 'LR': 'Liberia', 'LY': 'Libya', 'LI': 'Liechtenstein', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'MO': 'Macao', 'MG': 'Madagascar', 'MW': 'Malawi', 'MY': 'Malaysia', 'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta', 'MH': 'Marshall Islands', 'MQ': 'Martinique', 'MR': 'Mauritania', 'MU': 'Mauritius', 'YT': 'Mayotte', 'MX': 'Mexico', 'FM': 'Micronesia', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia', 'ME': 'Montenegro', 'MS': 'Montserrat', 'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar', 'NA': 'Namibia', 'NR': 'Nauru', 'NP': 'Nepal', 'NL': 'Netherlands', 'NC': 'New Caledonia', 'NZ': 'New Zealand', 'NI': 'Nicaragua', 'NE': 'Niger', 'NG': 'Nigeria', 'NU': 'Niue', 'NF': 'Norfolk Island', 'MK': 'North Macedonia', 'MP': 'Northern Mariana Islands', 'NO': 'Norway', 'OM': 'Oman', 'PK': 'Pakistan', 'PW': 'Palau', 'PS': 'Palestine, State of', 'PA': 'Panama', 'PG': 'Papua New Guinea', 'PY': 'Paraguay', 'PE': 'Peru', 'PH': 'Philippines', 'PN': 'Pitcairn', 'PL': 'Poland', 'PT': 'Portugal', 'PR': 'Puerto Rico', 'QA': 'Qatar', 'RO': 'Romania', 'RU': 'Russian Federation', 'RW': 'Rwanda', 'RE': 'Réunion', 'BL': 'Saint Barthélemy', 'SH': 'Saint Helena, Ascension and Tristan da Cunha', 'KN': 'Saint Kitts and Nevis', 'LC': 'Saint Lucia', 'MF': 'Saint Martin', 'PM': 'Saint Pierre and Miquelon', 'VC': 'Saint Vincent and the Grenadines', 'WS': 'Samoa', 'SM': 'San Marino', 'ST': 'Sao Tome and Principe', 'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia', 'SC': 'Seychelles', 'SL': 'Sierra Leone', 'SG': 'Singapore', 'SX': 'Sint Maarten', 'SK': 'Slovakia', 'SI': 'Slovenia', 'SB': 'Solomon Islands', 'SO': 'Somalia', 'ZA': 'South Africa', 'GS': 'South Georgia and the South Sandwich Islands', 'SS': 'South Sudan', 'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname', 'SJ': 'Svalbard and Jan Mayen', 'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syrian Arab Republic', 'TW': 'Taiwan', 'TJ': 'Tajikistan', 'TZ': 'Tanzania', 'TH': 'Thailand', 'TL': 'Timor-Leste', 'TG': 'Togo', 'TK': 'Tokelau', 'TO': 'Tonga', 'TT': 'Trinidad and Tobago', 'TN': 'Tunisia', 'TR': 'Turkey', 'TM': 'Turkmenistan', 'TC': 'Turks and Caicos Islands', 'TV': 'Tuvalu', 'UG': 'Uganda', 'UA': 'Ukraine', 'AE': 'United Arab Emirates', 'GB': 'United Kingdom', 'US': 'United States', 'UM': 'United States Minor Outlying Islands', 'UY': 'Uruguay', 'UZ': 'Uzbekistan', 'VU': 'Vanuatu', 'VE': 'Venezuela', 'VN': 'Viet Nam', 'VG': 'Virgin Islands', 'VI': 'Virgin Islands', 'WF': 'Wallis and Futuna', 'EH': 'Western Sahara', 'YE': 'Yemen', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+    const FLAG_CONFIG = {
+        BASE_URL: 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/7.2.3/flags/4x3/',
+        SIZES: {
+            channel: '28px',
+            title: '22px',
+            shorts: '20px'
+        },
+        MARGINS: {
+            channel: '12px',
+            title: '10px',
+            shorts: '8px'
+        }
     };
 
-    const processedVideos = new Set();
-    let currentChannelIdentifier = null;
-    let currentVideoId = null;
+    const COUNTRY_NAMES = {
+        'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire, Sint Eustatius and Saba', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei Darussalam', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cg': 'Congo', 'cd': 'Congo, Democratic Republic of the', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island and McDonald Islands', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'je': 'Jersey', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Lao People\'s Democratic Republic', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mk': 'North Macedonia', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine, State of', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'ro': 'Romania', 'ru': 'Russian Federation', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena, Ascension and Tristan da Cunha', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent and the Grenadines', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia and the South Sandwich Islands', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard and Jan Mayen', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syrian Arab Republic', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'th': 'Thailand', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'us': 'United States', 'um': 'United States Minor Outlying Islands', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Viet Nam', 'vg': 'Virgin Islands', 'vi': 'Virgin Islands', 'wf': 'Wallis and Futuna', 'eh': 'Western Sahara', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe'
+    };    
 
-    function checkDOMElements() {
-        const requiredElements = {
-            channelPage: ['.yt-core-attributed-string--white-space-pre-wrap', '#channel-name', '#text.ytd-channel-name', 'ytd-channel-name', 'h1.style-scope.ytd-channel-header-renderer', 'ytd-channel-name#channel-name', 'ytd-channel-name.ytd-c4-tabbed-header-renderer'],
-            videoPage: ['h1.style-scope.ytd-watch-metadata', 'ytd-watch-flexy']
-        };
+    const CACHE_CONFIG = {
+        PREFIX: 'yt_enhancer_',
+        EXPIRATION: 7 * 24 * 60 * 60 * 1000
+    };
 
-        const channelReady = requiredElements.channelPage.some(selector => document.querySelector(selector));
-        const videoReady = requiredElements.videoPage.some(selector => document.querySelector(selector));
+    const processedElements = new Set();
 
-        return {
-            channelReady,
-            videoReady
-        };
+    function getCacheKey(type, id) {
+        return `${CACHE_CONFIG.PREFIX}${type}_${id}`;
     }
 
-    function createFlagContainer(countryCode, isChannel) {
-        const container = document.createElement('div');
-        container.style.marginLeft = '8px';
-        container.style.display = 'flex';
-        container.style.alignItems = 'center';
-        container.style.padding = '4px';
-
-        const flagImg = document.createElement('img');
-        flagImg.src = `https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${countryCode.toLowerCase()}.svg`;
-        flagImg.style.width = isChannel ? '26px' : '20px';
-        flagImg.style.height = 'auto';
-        flagImg.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
-        flagImg.style.cursor = 'pointer';
-
-        container.appendChild(flagImg);
-        container.setAttribute('title', countryNames[countryCode] || countryCode);
-        return container;
-    }
-
-    function getChannelIdentifier() {
-        const path = window.location.pathname;
-        if (path.includes('/@')) {
-            const match = path.match(/@([^/]+)/);
-            return match ? match[1] : null;
-        }
-        if (path.includes('/channel/')) {
-            const match = path.match(/\/channel\/(UC[\w-]+)/);
-            return match ? match[1] : null;
-        }
-        return null;
-    }
-
-    function isChannelPage() {
-        const path = window.location.pathname;
-        const channelTabs = ['/@', '/channel/', '/featured', '/videos', '/streams', '/shorts', '/courses', '/playlists', '/community', '/podcasts', '/store', '/about', '/membership', '/channels', '/search'];
-        return channelTabs.some(tab => path.includes(tab));
-    }
-
-    function fetchChannelCountryData(channelIdentifier) {
-        return new Promise((resolve, reject) => {
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: `https://exyezed.vercel.app/api/channel/${channelIdentifier}`,
-                onload: function(response) {
-                    try {
-                        const data = JSON.parse(response.responseText);
-                        resolve(data.country);
-                    } catch (error) {
-                        reject(error);
-                    }
-                },
-                onerror: reject
-            });
-        });
-    }
-
-    async function addChannelFlag() {
-        if (!isChannelPage()) return;
-
-        const channelIdentifier = getChannelIdentifier();
-        if (!channelIdentifier) return;
-
-        if (channelIdentifier === currentChannelIdentifier) {
-            if (window.location.pathname === document.lastPathChecked) return;
-        }
-
-        currentChannelIdentifier = channelIdentifier;
-        document.lastPathChecked = window.location.pathname;
-
-        const selectors = ['.yt-core-attributed-string--white-space-pre-wrap', '#channel-name', '#text.ytd-channel-name', 'ytd-channel-name', 'h1.style-scope.ytd-channel-header-renderer', 'ytd-channel-name#channel-name', 'ytd-channel-name.ytd-c4-tabbed-header-renderer'];
-        const channelNameContainer = selectors.map(selector => document.querySelector(selector)).find(el => el);
-
-        if (channelNameContainer) {
-            const existingFlag = channelNameContainer.querySelector('.country-flag-container');
-            if (existingFlag) existingFlag.remove();
-
-            try {
-                const country = await fetchChannelCountryData(channelIdentifier);
-                if (!country || country === 'Unknown') return;
-
-                const verificationBadge = channelNameContainer.querySelector('.yt-core-attributed-string--inline-block-mod');
-                const flagContainer = createFlagContainer(country, true);
-                flagContainer.classList.add('country-flag-container');
-                flagContainer.style.display = 'inline-flex';
-
-                if (verificationBadge) {
-                    verificationBadge.parentNode.insertBefore(flagContainer, verificationBadge.nextSibling);
-                } else {
-                    channelNameContainer.appendChild(flagContainer);
-                }
-
-                const flagImg = flagContainer.querySelector('img');
-                flagImg.onerror = () => flagContainer.remove();
-            } catch (error) {
-                return;
-            }
-        }
-    }
-
-    function getVideoId() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoId = urlParams.get('v');
-        if (!videoId) {
-            const videoElement = document.querySelector('ytd-watch-flexy');
-            return videoElement?.getAttribute('video-id') || null;
-        }
-        return videoId;
-    }
-
-    function fetchVideoCountryData(videoId) {
-        return new Promise((resolve, reject) => {
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: `https://exyezed.vercel.app/api/video/${videoId}`,
-                onload: function(response) {
-                    try {
-                        const data = JSON.parse(response.responseText);
-                        resolve(data.country);
-                    } catch (error) {
-                        reject(error);
-                    }
-                },
-                onerror: reject
-            });
-        });
-    }
-
-    function isVideoPage() {
-        return window.location.pathname === '/watch' || document.querySelector('ytd-watch-flexy') !== null;
-    }
-
-    async function addVideoFlag() {
-        if (!isVideoPage()) return;
-
-        const videoId = getVideoId();
-        if (!videoId || videoId === currentVideoId || processedVideos.has(videoId)) return;
-
-        currentVideoId = videoId;
+    function getFromCache(type, id) {
+        const cacheKey = getCacheKey(type, id);
+        const cachedData = GM_getValue(cacheKey);
         
-        const titleContainer = document.querySelector('h1.style-scope.ytd-watch-metadata');
-        if (!titleContainer) return;
+        if (!cachedData) return null;
 
-        const existingFlag = titleContainer.querySelector('.country-flag-container');
-        if (existingFlag) existingFlag.remove();
+        const { value, timestamp } = JSON.parse(cachedData);
+        const now = Date.now();
 
-        try {
-            const country = await fetchVideoCountryData(videoId);
-            if (!country || country === 'Unknown') return;
-
-            titleContainer.style.display = 'flex';
-            titleContainer.style.alignItems = 'center';
-
-            const flagContainer = createFlagContainer(country, false);
-            flagContainer.classList.add('country-flag-container');
-            titleContainer.appendChild(flagContainer);
-
-            const flagImg = flagContainer.querySelector('img');
-            flagImg.onerror = () => flagContainer.remove();
-
-            processedVideos.add(videoId);
-        } catch (error) {
-            return;
+        if (now - timestamp > CACHE_CONFIG.EXPIRATION) {
+            GM_setValue(cacheKey, null);
+            return null;
         }
+
+        return value;
     }
 
-    function setupObservers() {
-        let lastUrl = location.href;
+    function setToCache(type, id, value) {
+        const cacheKey = getCacheKey(type, id);
+        const cacheData = {
+            value: value,
+            timestamp: Date.now()
+        };
+        GM_setValue(cacheKey, JSON.stringify(cacheData));
+    }
 
-        new MutationObserver(() => {
-            const currentUrl = location.href;
-            if (currentUrl !== lastUrl) {
-                lastUrl = currentUrl;
-                currentChannelIdentifier = null;
-                currentVideoId = null;
-                
-                const tryAddFlags = (attempts = 0) => {
-                    const { channelReady, videoReady } = checkDOMElements();
-                    
-                    if ((channelReady || videoReady) || attempts > 10) {
-                        if (channelReady) addChannelFlag();
-                        if (videoReady) addVideoFlag();
-                    } else {
-                        setTimeout(() => tryAddFlags(attempts + 1), 100);
+    async function getCountryCode(type, id) {
+        const cachedValue = getFromCache(type, id);
+        if (cachedValue) {
+            return cachedValue;
+        }
+
+        const url = `https://exyezed.vercel.app/api/${type}/${id}`;
+
+        if (typeof GM_xmlhttpRequest !== 'undefined') {
+            return new Promise((resolve, reject) => {
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url: url,
+                    onload: function(response) {
+                        if (response.status >= 200 && response.status < 300) {
+                            try {
+                                const data = JSON.parse(response.responseText);
+                                const countryCode = data.country.toLowerCase() || 'unknown';
+                                setToCache(type, id, countryCode);
+                                resolve(countryCode);
+                            } catch (error) {
+                                console.error('Error parsing JSON:', error);
+                                resolve('unknown');
+                            }
+                        } else {
+                            console.error('Request failed:', response.status);
+                            resolve('unknown');
+                        }
+                    },
+                    onerror: function(error) {
+                        console.error('Request error:', error);
+                        resolve('unknown');
                     }
-                };
-
-                tryAddFlags();
-            }
-        }).observe(document, {subtree: true, childList: true});
-
-        const contentObserver = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                if (mutation.target.id === 'content' ||
-                    mutation.target.id === 'primary' ||
-                    mutation.target.id === 'player' ||
-                    mutation.target.id === 'channel-header' ||
-                    mutation.target.classList.contains('ytd-c4-tabbed-header-renderer')) {
-                    const { channelReady, videoReady } = checkDOMElements();
-                    if (channelReady) addChannelFlag();
-                    if (videoReady) addVideoFlag();
-                    break;
-                }
-            }
-        });
-
-        const observeTargets = ['#content', '#primary', '#player', '#channel-header', 'ytd-c4-tabbed-header-renderer']
-            .map(selector => document.querySelector(selector))
-            .filter(Boolean);
-
-        observeTargets.forEach(target => {
-            contentObserver.observe(target, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['video-id', 'page-subtype']
-            });
-        });
-    }
-
-    function init() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                setupObservers();
-                const { channelReady, videoReady } = checkDOMElements();
-                if (channelReady) addChannelFlag();
-                if (videoReady) addVideoFlag();
+                });
             });
         } else {
-            setupObservers();
-            const { channelReady, videoReady } = checkDOMElements();
-            if (channelReady) addChannelFlag();
-            if (videoReady) addVideoFlag();
+            return 'unknown';
         }
     }
 
-    init();
+    function createFlag(size, margin, className, countryCode) {
+        const flag = document.createElement('img');
+        flag.src = countryCode === 'unknown'
+            ? 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/7.2.3/flags/4x3/xx.svg'
+            : `${FLAG_CONFIG.BASE_URL}${countryCode}.svg`;
+        flag.className = `country-flag ${className}`;
+        flag.style.width = size;
+        flag.style.height = 'auto';
+        flag.style.marginLeft = margin;
+        flag.style.verticalAlign = 'middle';
+        flag.style.cursor = 'pointer';
+        flag.title = countryCode === 'unknown' 
+            ? 'Country Not Set'
+            : (COUNTRY_NAMES[countryCode] || countryCode.toUpperCase());
+        
+        return flag;
+    }
+
+    function removeExistingFlags(element) {
+        const existingFlags = element.querySelectorAll('.country-flag');
+        existingFlags.forEach(flag => flag.remove());
+    }
+
+    async function addFlag() {
+        // Channel
+        const channelElement = document.querySelector('.dynamic-text-view-model-wiz__h1 .yt-core-attributed-string');
+        if (channelElement && !processedElements.has(channelElement)) {
+            removeExistingFlags(channelElement.parentElement);
+            processedElements.add(channelElement);
+            const channelUrl = window.location.pathname;
+            const channelId = channelUrl.includes('@')
+                ? channelUrl.split('@')[1].split('/')[0]
+                : channelUrl.split('/')[2];
+
+            const countryCode = await getCountryCode('channel', channelId);
+            channelElement.appendChild(
+                createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryCode)
+            );
+        }
+
+        // Video
+        const titleElement = document.querySelector('#title yt-formatted-string');
+        if (titleElement && !processedElements.has(titleElement)) {
+            const titleParent = titleElement.closest('#title h1');
+            if (titleParent) {
+                removeExistingFlags(titleParent);
+                processedElements.add(titleElement);
+                const videoId = new URLSearchParams(window.location.search).get('v');
+                if (videoId) {
+                    const countryCode = await getCountryCode('video', videoId);
+                    titleParent.style.display = 'flex';
+                    titleParent.style.alignItems = 'center';
+                    titleParent.appendChild(
+                        createFlag(FLAG_CONFIG.SIZES.title, FLAG_CONFIG.MARGINS.title, 'title-flag', countryCode)
+                    );
+                }
+            }
+        }
+
+        // Shorts
+        const shortsChannelElements = document.querySelectorAll('.YtReelChannelBarViewModelChannelName');
+        shortsChannelElements.forEach(async element => {
+            if (!processedElements.has(element)) {
+                removeExistingFlags(element);
+                processedElements.add(element);
+                const shortsId = window.location.pathname.split('/').pop();
+                const countryCode = await getCountryCode('video', shortsId);
+                element.appendChild(
+                    createFlag(FLAG_CONFIG.SIZES.shorts, FLAG_CONFIG.MARGINS.shorts, 'shorts-flag', countryCode)
+                );
+            }
+        });
+    }
+
+    const shortsObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'subtree') {
+                setTimeout(addFlag, 100);
+            }
+        });
+    });
+
+    const regularObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length) {
+                addFlag();
+            }
+        });
+    });
+
+    const startObservers = () => {
+        const shortsContainer = document.querySelector('ytd-shorts');
+        if (shortsContainer) {
+            shortsObserver.observe(shortsContainer, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        regularObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    };
+
+    function init() {
+        processedElements.clear();
+        startObservers();
+        addFlag();
+
+        window.addEventListener('yt-navigate-finish', () => {
+            shortsObserver.disconnect();
+            regularObserver.disconnect();
+            processedElements.clear();
+            startObservers();
+            addFlag();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
     console.log('YouTube Enhancer (Reveal Country Flag) is running');
 })();

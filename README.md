@@ -128,6 +128,10 @@ Display country flags for YouTube channels and videos.
 
 ![image](https://github.com/user-attachments/assets/5276b057-2ae7-429c-bb8c-3aac5441f54d)
 
+> Shorts Page
+
+![TQiQqSnqXc](https://github.com/user-attachments/assets/c78af414-101f-4b32-8233-60da3b85f38c)
+
 ## 10. YouTube Enhancer (Secret Stats)
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.

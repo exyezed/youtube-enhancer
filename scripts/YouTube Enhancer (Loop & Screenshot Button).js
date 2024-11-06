@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Loop & Screenshot Button)
 // @description  Integrating loop and screenshot buttons into the video and shorts player to enhance user functionality.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -22,7 +22,6 @@
         clickDuration: 200
     };
 
-    // CSS Styles
     const YouTubeEnhancerLoopScreenshotCSS = `
     a.YouTubeEnhancerLoopScreenshot-loop-button, 
     a.YouTubeEnhancerLoopScreenshot-screenshot-button {
@@ -145,7 +144,6 @@
     }
     `;
     
-    // Utility Functions
     const YouTubeEnhancerLoopScreenshotUtils = {
         addStyle(styleString) {
             const style = document.createElement('style');
@@ -358,26 +356,60 @@
         }
     };
 
-    // Regular YouTube Video Functions
     const YouTubeEnhancerLoopScreenshotRegularVideo = {
         init() {
-            this.insertLoopElement();
-            this.insertScreenshotElement();
-            this.addObserver();
-            this.addContextMenuListener();
+            this.waitForControls().then(() => {
+                this.insertLoopElement();
+                this.insertScreenshotElement();
+                this.addObserver();
+                this.addContextMenuListener();
+            }).catch(error => {
+                console.error('Failed to initialize YouTube Enhancer:', error);
+            });
+        },
+
+        waitForControls() {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const maxAttempts = 50; // 5 seconds maximum wait time
+                
+                const checkControls = () => {
+                    const controls = document.querySelector('div.ytp-left-controls');
+                    if (controls) {
+                        resolve(controls);
+                    } else if (attempts >= maxAttempts) {
+                        reject(new Error('Controls not found after maximum attempts'));
+                    } else {
+                        attempts++;
+                        setTimeout(checkControls, 100);
+                    }
+                };
+                
+                checkControls();
+            });
         },
 
         insertLoopElement() {
+            const controls = document.querySelector('div.ytp-left-controls');
+            if (!controls) return;
+
+            if (document.querySelector('.YouTubeEnhancerLoopScreenshot-loop-button')) return;
+
             const newButton = document.createElement('a');
             newButton.classList.add('ytp-button', 'YouTubeEnhancerLoopScreenshot-loop-button');
             newButton.title = 'Loop Video';
             newButton.appendChild(YouTubeEnhancerLoopScreenshotUtils.getYouTubeVideoLoopSVG());
             newButton.addEventListener('click', this.toggleLoopState);
 
-            document.querySelector('div.ytp-left-controls').appendChild(newButton);
+            controls.appendChild(newButton);
         },
 
         insertScreenshotElement() {
+            const controls = document.querySelector('div.ytp-left-controls');
+            if (!controls) return;
+
+            if (document.querySelector('.YouTubeEnhancerLoopScreenshot-screenshot-button')) return;
+
             const newButton = document.createElement('a');
             newButton.classList.add('ytp-button', 'YouTubeEnhancerLoopScreenshot-screenshot-button');
             newButton.title = 'Take Screenshot';
@@ -385,7 +417,11 @@
             newButton.addEventListener('click', this.handleScreenshotClick);
 
             const loopButton = document.querySelector('.YouTubeEnhancerLoopScreenshot-loop-button');
-            loopButton.parentNode.insertBefore(newButton, loopButton.nextSibling);
+            if (loopButton) {
+                loopButton.parentNode.insertBefore(newButton, loopButton.nextSibling);
+            } else {
+                controls.appendChild(newButton);
+            }
         },
 
         toggleLoopState() {
@@ -440,7 +476,6 @@
         }
     };
 
-    // YouTube Shorts Functions
     const YouTubeEnhancerLoopScreenshotShorts = {
         init() {
             this.insertScreenshotElement();
@@ -487,7 +522,6 @@
         }
     };
 
-    // Theme Functions
     const YouTubeEnhancerLoopScreenshotTheme = {
         init() {
             this.updateStyles();
@@ -508,18 +542,26 @@
         }
     };
 
-    // Main Initialization
     function YouTubeEnhancerLoopScreenshotInit() {
         YouTubeEnhancerLoopScreenshotUtils.addStyle(YouTubeEnhancerLoopScreenshotCSS);
-        initializeWhenReady();
+        waitForVideo().then(initializeWhenReady);
+    }
+
+    function waitForVideo() {
+        return new Promise((resolve) => {
+            const checkVideo = () => {
+                if (document.querySelector('video')) {
+                    resolve();
+                } else {
+                    setTimeout(checkVideo, 100);
+                }
+            };
+            checkVideo();
+        });
     }
 
     function initializeWhenReady() {
-        if (document.querySelector('video')) {
-            YouTubeEnhancerLoopScreenshotInitializeFeatures();
-        } else {
-            setTimeout(initializeWhenReady, 500);
-        }
+        YouTubeEnhancerLoopScreenshotInitializeFeatures();
     }
 
     function YouTubeEnhancerLoopScreenshotInitializeFeatures() {
@@ -534,7 +576,6 @@
         }
     }
 
-    // Observers and Event Listeners
     const YouTubeEnhancerLoopScreenshotShortsObserver = new MutationObserver((mutations) => {
         for (let mutation of mutations) {
             if (mutation.type === 'childList') {
@@ -553,7 +594,6 @@
         }
     });
 
-    // Initialize
     YouTubeEnhancerLoopScreenshotInit();
     console.log('YouTube Enhancer (Loop & Screenshot Button) is running');
 })();

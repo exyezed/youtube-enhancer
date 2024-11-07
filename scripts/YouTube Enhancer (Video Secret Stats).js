@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Video Secret Stats)
 // @description  Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -14,10 +14,7 @@
 (function() {
     'use strict';
 
-    // Styles
     const styles = `
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
-
         .YouTubeEnhancerVideoStats {
             width: 36px;
             height: 36px;
@@ -40,19 +37,15 @@
         html:not([dark]) .YouTubeEnhancerVideoStats:hover {
             background-color: #00000014;
         }
-        .YouTubeEnhancerVideoStats .material-symbols-outlined {
-            font-size: 24px;
-            font-variation-settings:
-                'FILL' 0,
-                'wght' 150,
-                'GRAD' 0,
-                'opsz' 24;
+        .YouTubeEnhancerVideoStats svg {
+            width: 18px;
+            height: 18px;
         }
-        html[dark] .YouTubeEnhancerVideoStats .material-symbols-outlined {
-            color: var(--yt-spec-text-primary, #fff);
+        html[dark] .YouTubeEnhancerVideoStats svg {
+            fill: var(--yt-spec-text-primary, #fff);
         }
-        html:not([dark]) .YouTubeEnhancerVideoStats .material-symbols-outlined {
-            color: var(--yt-spec-text-primary, #030303);
+        html:not([dark]) .YouTubeEnhancerVideoStats svg {
+            fill: var(--yt-spec-text-primary, #030303);
         }
 
         .YouTubeEnhancerShortsStats {
@@ -83,22 +76,20 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
 
-        .YouTubeEnhancerShortsStats .material-symbols-outlined {
-            font-size: 24px;
-            font-variation-settings:
-                'FILL' 1;
+        .YouTubeEnhancerShortsStats svg {
+            width: 24px;
+            height: 24px;
         }
 
-        html[dark] .YouTubeEnhancerShortsStats .material-symbols-outlined {
-            color: white;
+        html[dark] .YouTubeEnhancerShortsStats svg {
+            fill: white;
         }
 
-        html:not([dark]) .YouTubeEnhancerShortsStats .material-symbols-outlined {
-            color: black;
+        html:not([dark]) .YouTubeEnhancerShortsStats svg {
+            fill: black;
         }
     `;
 
-    // Helper Functions
     function addStyles() {
         if (!document.querySelector('#youtube-enhancer-styles')) {
             const styleElement = document.createElement('style');
@@ -116,16 +107,18 @@
         return normalVideoId || (shortsMatch ? shortsMatch[1] : null);
     }
 
-    // Icon Creation and Functionality
-    function createLockIcon(isShorts = false) {
+    function createCupcakeIcon(isShorts = false) {
         const icon = document.createElement('div');
         icon.className = isShorts ? 'YouTubeEnhancerShortsStats' : 'YouTubeEnhancerVideoStats';
 
-        const lockSymbol = document.createElement('span');
-        lockSymbol.className = 'material-symbols-outlined';
-        lockSymbol.textContent = 'lock_open';
-
-        icon.appendChild(lockSymbol);
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 448 512");
+        
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M224 16c-6.7 0-10.8-2.8-15.5-6.1C201.9 5.4 194 0 176 0c-30.5 0-52 43.7-66 89.4C62.7 98.1 32 112.2 32 128c0 14.3 25 27.1 64.6 35.9c-.4 4-.6 8-.6 12.1c0 17 3.3 33.2 9.3 48l-59.9 0C38 224 32 230 32 237.4c0 1.7 .3 3.4 1 5l38.8 96.9C28.2 371.8 0 423.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7c0-58.5-28.2-110.4-71.7-143L415 242.4c.6-1.6 1-3.3 1-5c0-7.4-6-13.4-13.4-13.4l-59.9 0c6-14.8 9.3-31 9.3-48c0-4.1-.2-8.1-.6-12.1C391 155.1 416 142.3 416 128c0-15.8-30.7-29.9-78-38.6C324 43.7 302.5 0 272 0c-18 0-25.9 5.4-32.5 9.9c-4.8 3.3-8.8 6.1-15.5 6.1zm56 208l-12.4 0c-16.5 0-31.1-10.6-36.3-26.2c-2.3-7-12.2-7-14.5 0c-5.2 15.6-19.9 26.2-36.3 26.2L168 224c-22.1 0-40-17.9-40-40l0-14.4c28.2 4.1 61 6.4 96 6.4s67.8-2.3 96-6.4l0 14.4c0 22.1-17.9 40-40 40zm-88 96l16 32L176 480 128 288l64 32zm128-32L272 480 240 352l16-32 64-32z");
+        
+        svg.appendChild(path);
+        icon.appendChild(svg);
 
         icon.addEventListener('click', redirectToStatsAPI);
 
@@ -143,35 +136,49 @@
         }
     }
 
-    // DOM Manipulation
     function insertIconForRegularVideo() {
         const targetSelector = '#owner';
         const target = document.querySelector(targetSelector);
 
         if (target && !document.querySelector('.YouTubeEnhancerVideoStats')) {
-            const lockIcon = createLockIcon();
-            target.appendChild(lockIcon);
+            const cupcakeIcon = createCupcakeIcon();
+            target.appendChild(cupcakeIcon);
         }
     }
 
     function insertIconForShorts() {
         const shortsContainer = document.querySelector('ytd-reel-video-renderer[is-active] #actions');
+        
         if (shortsContainer && !shortsContainer.querySelector('.YouTubeEnhancerShortsStats')) {
-            const iconDiv = createLockIcon(true);
+            const iconDiv = createCupcakeIcon(true);
             shortsContainer.insertBefore(iconDiv, shortsContainer.firstChild);
+            return true;
         }
+        return false;
     }
 
     function checkAndInsertIcon() {
         const isShorts = window.location.pathname.includes('/shorts/');
         if (isShorts) {
-            setTimeout(insertIconForShorts, 500); // Delay to ensure DOM is ready
+            const shortsObserver = new MutationObserver((mutations, observer) => {
+                if (insertIconForShorts()) {
+                    observer.disconnect();
+                }
+            });
+
+            const shortsContainer = document.querySelector('ytd-shorts');
+            if (shortsContainer) {
+                shortsObserver.observe(shortsContainer, { 
+                    childList: true, 
+                    subtree: true 
+                });
+                insertIconForShorts();
+            }
         } else if (getVideoId()) {
             insertIconForRegularVideo();
         }
     }
 
-    // Initialization and Event Listeners
     function init() {
         addStyles();
         checkAndInsertIcon();
@@ -200,4 +207,5 @@
             checkAndInsertIcon();
         }
     });
+    console.log('YouTube Enhancer (Video Secret Stats) is running');
 })();

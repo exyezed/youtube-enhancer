@@ -166,7 +166,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 > Video Stats Page
 
-![chrome_bz90yICb3s](https://github.com/user-attachments/assets/16ed2d78-1c0b-4750-b82e-a7b90b8f3270)
+![video_stats](https://github.com/user-attachments/assets/b1b11398-b890-490d-8a54-b26227618092)
 
 ### Shorts Stats
 

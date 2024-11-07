@@ -44,7 +44,7 @@ Viewing original shorts thumbnails.
 
 #### [Install Script](https://update.greasyfork.org/scripts/513132/YouTube%20Enhancer%20%28Shorts%20Thumbnail%29.user.js)
 
-![chrome_wxuAlkEHZBA](https://github.com/user-attachments/assets/51dd9f4c-fc3c-47be-948d-f4f25f1ab7ed)
+![378044295-51dd9f4c-fc3c-47be-948d-f4f25f1ab7ed](https://github.com/user-attachments/assets/fc68bf17-6d78-42bf-aada-93c8a1aa3614)
 
 ## 4. YouTube Enhancer (Loop & Screenshot Button)
 
@@ -68,11 +68,11 @@ Integrating clickable badges that reveal the total views for all video types and
 
 > Compact Mode
 
-![chrome_gRw4d7xfBH1](https://github.com/user-attachments/assets/92d34fad-458f-4cfc-818f-e3a6316fb19d)
+![image](https://github.com/user-attachments/assets/1089e845-0231-43a2-aaac-06e4675bcd36)
 
 > Detail Mode
 
-![chrome_gRw4d7xfBH2](https://github.com/user-attachments/assets/a305e0a7-9cb4-4371-b256-e93980312dc9)
+![image](https://github.com/user-attachments/assets/9b41ff81-c44e-4414-860d-b9032597fa86)
 
 > Shorts Video
 
@@ -122,15 +122,15 @@ Display country flags for YouTube channels and videos.
 
 > Channel Page
 
-![image](https://github.com/user-attachments/assets/106b0147-623b-4ee5-9129-5945560ac18c)
+![image](https://github.com/user-attachments/assets/573f257c-1e84-45fc-867d-530c955e2cd7)
 
 > Video Page
 
-![image](https://github.com/user-attachments/assets/5276b057-2ae7-429c-bb8c-3aac5441f54d)
+![image](https://github.com/user-attachments/assets/fb6018ba-be1d-4d8d-81d1-449e27850a00)
 
 > Shorts Page
 
-![TQiQqSnqXc](https://github.com/user-attachments/assets/c78af414-101f-4b32-8233-60da3b85f38c)
+![image](https://github.com/user-attachments/assets/ff3df038-8dbc-48ee-8ac8-c70a9060b7dd)
 
 ## 10. YouTube Enhancer (Secret Stats)
 
@@ -152,7 +152,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 > Stream Stats Page
 
-![chrome_ifphTsuNIk](https://github.com/user-attachments/assets/acfb4f11-ec72-4bfd-9859-0c3c0f3dc7a9)
+![chrome_ifphTsuNIk copy](https://github.com/user-attachments/assets/cce477d9-8e5b-4bb5-bdae-22f444c7e920)
 
 ## 11. YouTube Enhancer (Video Secret Stats)
 
@@ -162,7 +162,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 ### Video Stats
 
-![image](https://github.com/user-attachments/assets/12c9b84f-18ac-48c7-ad6c-4119f7a32252)
+![image](https://github.com/user-attachments/assets/b67cc32d-edc9-4989-a842-2230bfd359a1)
 
 > Video Stats Page
 

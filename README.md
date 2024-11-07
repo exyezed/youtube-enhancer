@@ -14,7 +14,7 @@ Revealing the channel ID, displayed next to the channel handle.
 
 #### [Install Script](https://update.greasyfork.org/scripts/513116/YouTube%20Enhancer%20%28Reveal%20Channel%20ID%29.user.js)
 
-![chrome_MP0hY92q8z](https://github.com/user-attachments/assets/2a6dd741-1edb-4138-8e29-0145842db0d3)
+![channel_id](https://github.com/user-attachments/assets/4f7998c9-79fa-4538-bc5f-cc21caba9329)
 
 ## 2. YouTube Enhancer (Full-Sized Image Preview)
 
@@ -24,19 +24,19 @@ Viewing original video thumbnails, avatars, and channel banners, with a thumbnai
 
 > YouTube Avatar Picture
 
-![chrome_GY0vBd4CLH](https://github.com/user-attachments/assets/b31561ab-ed9f-4110-9db7-dc4168dfd4c7)
+![avatar_thumbnail](https://github.com/user-attachments/assets/aaf459e7-0f57-407f-956f-89e8bff8d6a4)
 
 > YouTube Channel Banner
 
-![chrome_Y5Et1hDXZX](https://github.com/user-attachments/assets/5b396f0b-f090-457a-ba37-cc9f7062550e)
+![banner_thumbnail](https://github.com/user-attachments/assets/d5e7aaec-13af-46ab-96fa-0ec5df28eb1c)
 
 > YouTube Video Thumbnail
 
-![chrome_8Aqg1pskrH](https://github.com/user-attachments/assets/b130a70b-e55d-4203-ae4b-124f4864b583)
+![video_thumbnail](https://github.com/user-attachments/assets/ee221b6d-5160-4cc4-b681-a71459d4a50c)
 
 > Thumbnail Preview Above Panel
 
-![chrome_CGYaShi5Xl](https://github.com/user-attachments/assets/dc4b24a2-ab84-4f2a-b5c2-79c801373904)
+![panel_thumbnail](https://github.com/user-attachments/assets/91e99c9e-2ae5-4caa-9268-16f529372a3f)
 
 ## 3. YouTube Enhancer (Shorts Thumbnail)
 
@@ -44,7 +44,7 @@ Viewing original shorts thumbnails.
 
 #### [Install Script](https://update.greasyfork.org/scripts/513132/YouTube%20Enhancer%20%28Shorts%20Thumbnail%29.user.js)
 
-![378044295-51dd9f4c-fc3c-47be-948d-f4f25f1ab7ed](https://github.com/user-attachments/assets/fc68bf17-6d78-42bf-aada-93c8a1aa3614)
+![shorts_thumbnail](https://github.com/user-attachments/assets/e4d85085-a0de-42bd-bbb2-9ee597e59b86)
 
 ## 4. YouTube Enhancer (Loop & Screenshot Button)
 
@@ -54,11 +54,11 @@ Integrating loop and screenshot buttons into the video and shorts player to enha
 
 > Video Player
 
-![chrome_JtsZGDDAdx](https://github.com/user-attachments/assets/cc06a2cd-c26f-41a5-9a09-3ae5f71e7cde)
+![ss_button_video](https://github.com/user-attachments/assets/b9d27615-852b-4421-b3de-bd8740f14e5d)
 
 > Shorts Player
 
-![chrome_vOHT2JqXuc](https://github.com/user-attachments/assets/c336cfae-ec85-4dac-add0-82779f2239c2)
+![ss_button_shorts](https://github.com/user-attachments/assets/352d3742-f3eb-4a39-b937-ad7fedb9b8b9)
 
 ## 5. YouTube Enhancer (Reveal Views & Upload Time)
 
@@ -68,15 +68,15 @@ Integrating clickable badges that reveal the total views for all video types and
 
 > Compact Mode
 
-![image](https://github.com/user-attachments/assets/1089e845-0231-43a2-aaac-06e4675bcd36)
+![view_compact](https://github.com/user-attachments/assets/aae7e890-df36-43f1-892e-74c1c999aa6f)
 
 > Detail Mode
 
-![image](https://github.com/user-attachments/assets/9b41ff81-c44e-4414-860d-b9032597fa86)
+![view_full](https://github.com/user-attachments/assets/c36645bf-bb68-4f2a-b545-8161a60f2d52)
 
 > Shorts Video
 
-![chrome_QHVFV5ayfy](https://github.com/user-attachments/assets/f5fdb395-67a7-4247-bac2-26d87257f6d1)
+![view_shorts](https://github.com/user-attachments/assets/b22b468d-de51-45d6-a866-c9e647f76878)
 
 ## 6. YouTube Enhancer (Extras)
 
@@ -86,11 +86,11 @@ Integrating clickable badges that reveal the total views for all video types and
 
 > Before
 
-![chrome_C5oCeD5WAPB](https://github.com/user-attachments/assets/169bf228-d852-4724-ae91-771076929173)
+![before](https://github.com/user-attachments/assets/60e89c83-9abb-4715-b9f2-a3ba78649b3e)
 
 > After
 
-![chrome_C5oCeD5WAP](https://github.com/user-attachments/assets/1a042e33-7ff7-4d45-926c-64a51c556748)
+![after](https://github.com/user-attachments/assets/98aaec82-a6bc-40e1-9006-15046ed4f379)
 
 ## 7. YouTube Enhancer (Reveal Video Category)
 
@@ -100,11 +100,11 @@ Revealing the video category.
 
 > Videos Page
 
-![image](https://github.com/user-attachments/assets/a3e4cf1b-d769-483a-8db8-d95b5ecff045)
+![category_video](https://github.com/user-attachments/assets/66da0bda-0148-4ae3-b0f6-36d73a6e7dad)
 
 > Shorts Page
 
-![chrome_fsmjq7Ce1c1](https://github.com/user-attachments/assets/04347092-746a-4505-be5d-96850ace30d9)
+![category_shorts](https://github.com/user-attachments/assets/97421cd2-9c1b-4178-99ff-23b8d0492fef)
 
 ## 8. YouTube Enhancer (Channel Video Counters)
 
@@ -112,7 +112,7 @@ Automatically counts and displays the total number of videos, shorts, and live s
 
 #### [Install Script](https://update.greasyfork.org/scripts/513490/YouTube%20Enhancer%20%28Channel%20Video%20Counters%29.user.js)
 
-![chrome_6lhVLhDdfw](https://github.com/user-attachments/assets/e239eb56-0834-4f5d-820a-851a04acddff)
+![video_counts](https://github.com/user-attachments/assets/f572f340-5510-4400-8276-0971f8ae605c)
 
 ## 9. YouTube Enhancer (Reveal Country Flag)
 
@@ -122,15 +122,15 @@ Display country flags for YouTube channels and videos.
 
 > Channel Page
 
-![image](https://github.com/user-attachments/assets/573f257c-1e84-45fc-867d-530c955e2cd7)
+![channel_flag](https://github.com/user-attachments/assets/021fe329-f3bd-47bf-9599-083d4d456745)
 
 > Video Page
 
-![image](https://github.com/user-attachments/assets/fb6018ba-be1d-4d8d-81d1-449e27850a00)
+![video_flag](https://github.com/user-attachments/assets/3a89634d-3e34-49a2-b8ca-9eb1ce37c5f5)
 
 > Shorts Page
 
-![image](https://github.com/user-attachments/assets/ff3df038-8dbc-48ee-8ac8-c70a9060b7dd)
+![shorts_flag](https://github.com/user-attachments/assets/97897325-084a-4fe4-8a05-1db76adc3be9)
 
 ## 10. YouTube Enhancer (Secret Stats)
 
@@ -140,19 +140,19 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ### Channel Stats
 
-![image](https://github.com/user-attachments/assets/b538fcac-994a-44d9-9ef6-ff1b398a6ab8)
+![secret_stats_button](https://github.com/user-attachments/assets/8d71957d-0862-4a39-9122-195b9c3ecbbe)
 
 > Channel Stats Page
 
-![chrome_wfD4sULI8x](https://github.com/user-attachments/assets/fb7be6ee-b0f3-4bfd-b2b0-3f73ef561c85)
+![secret_stats](https://github.com/user-attachments/assets/ac1e10da-c1ce-49b3-931e-bf5bd4c6a042)
 
 ### Stream Stats
 
-![image](https://github.com/user-attachments/assets/adfb21fa-4ea4-4e24-98fd-0028ceca9ae3)
+![stream_stats_button](https://github.com/user-attachments/assets/932891d0-6a7e-4163-9216-c0457f34e236)
 
 > Stream Stats Page
 
-![chrome_ifphTsuNIk copy](https://github.com/user-attachments/assets/cce477d9-8e5b-4bb5-bdae-22f444c7e920)
+![stream_stats](https://github.com/user-attachments/assets/fc080770-314c-40d3-9f1c-f128a803202b)
 
 ## 11. YouTube Enhancer (Video Secret Stats)
 
@@ -162,7 +162,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 ### Video Stats
 
-![image](https://github.com/user-attachments/assets/b67cc32d-edc9-4989-a842-2230bfd359a1)
+![video_secret_button](https://github.com/user-attachments/assets/2ca10f82-e391-4ad3-9e7f-3fc9af2e47f3)
 
 > Video Stats Page
 
@@ -170,8 +170,8 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 ### Shorts Stats
 
-![image](https://github.com/user-attachments/assets/166e5bc3-5c3e-4505-87fb-867bce13d2f1)
+![shorts_button_stats](https://github.com/user-attachments/assets/cc275a2c-1541-42ba-b111-5dc422534f63)
 
 > Shorts Stats Page
 
-![chrome_1wwTvpaNmu](https://github.com/user-attachments/assets/e4c31478-61e8-40e3-b265-2c49c89017f0)
+![shorts_stats](https://github.com/user-attachments/assets/32e2f0cd-1c49-4421-b8a5-72666a02b6f0)

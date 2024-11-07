@@ -140,7 +140,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ### Channel Stats
 
-![chrome_1M5GI53UZa](https://github.com/user-attachments/assets/43caf8b8-b8fa-4be7-8edd-1fa99087b926)
+![image](https://github.com/user-attachments/assets/b538fcac-994a-44d9-9ef6-ff1b398a6ab8)
 
 > Channel Stats Page
 
@@ -148,7 +148,7 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ### Stream Stats
 
-![chrome_F0gIWRSX9b](https://github.com/user-attachments/assets/13d5d6ae-cc76-4f50-9094-c3cb9258d6ad)
+![image](https://github.com/user-attachments/assets/adfb21fa-4ea4-4e24-98fd-0028ceca9ae3)
 
 > Stream Stats Page
 
@@ -162,7 +162,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 ### Video Stats
 
-![chrome_dQeNg1kkB2](https://github.com/user-attachments/assets/16e498d2-72c7-4471-b504-6666b8ab62d4)
+![image](https://github.com/user-attachments/assets/12c9b84f-18ac-48c7-ad6c-4119f7a32252)
 
 > Video Stats Page
 
@@ -170,7 +170,7 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 ### Shorts Stats
 
-![chrome_2gTOPvjpwl](https://github.com/user-attachments/assets/795efde4-a494-4693-aa77-dab45dea25e7)
+![image](https://github.com/user-attachments/assets/166e5bc3-5c3e-4505-87fb-867bce13d2f1)
 
 > Shorts Stats Page
 

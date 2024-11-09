@@ -186,3 +186,5 @@ Adds an overlay to YouTube channel banners showing real-time subscriber count.
 #### [Install Script](https://update.greasyfork.org/scripts/516477/YouTube%20Enhancer%20%28Real-Time%20Subscriber%20Count%29.user.js)
 
 ![hbSMkDCQgP](https://github.com/user-attachments/assets/6a08ea4e-ae45-4ade-9fa7-850bdd4302e2)
+
+#### Thanks to [livecounts.io](https://livecounts.io/?)

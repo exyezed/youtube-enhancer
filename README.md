@@ -175,3 +175,14 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 > Shorts Stats Page
 
 ![shorts_stats](https://github.com/user-attachments/assets/32e2f0cd-1c49-4421-b8a5-72666a02b6f0)
+
+## 12. YouTube Enhancer (Real-Time Subscriber Count)
+
+Adds an overlay to YouTube channel banners showing real-time subscriber count.
+
+> [!WARNING]
+> Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
+
+#### [Install Script](https://update.greasyfork.org/scripts/516477/YouTube%20Enhancer%20%28Real-Time%20Subscriber%20Count%29.user.js)
+
+![hbSMkDCQgP](https://github.com/user-attachments/assets/6a08ea4e-ae45-4ade-9fa7-850bdd4302e2)

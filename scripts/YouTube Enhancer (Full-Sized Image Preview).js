@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Full-Sized Image Preview)
 // @description  Viewing original video thumbnails, avatars, and channel banners, with a thumbnail preview above the panel.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -39,9 +39,6 @@
         .YouTubeEnhancerFullSized-container:hover .YouTubeEnhancerFullSized-button {
             opacity: 1;
         }
-        .YouTubeEnhancerFullSized-clickable-image {
-            cursor: pointer;
-        }
         #YouTubeEnhancerFullSized-custom-image {
             width: 100%;
             height: auto;
@@ -68,10 +65,13 @@
         return svg;
     }
 
-    const defaultIconPath = "M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4z";
+    const defaultIconPath = "M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4";
     const hoverIconPath = "M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8zM5 19l3-4l2 3l3-4l4 5z";
     
     let YouTubeEnhancerFullSizedCurrentVideoId = '';
+    let thumbnailInsertionAttempts = 0;
+    const MAX_ATTEMPTS = 10;
+    const RETRY_DELAY = 500;
 
     function YouTubeEnhancerFullSizedOpenImage(url) {
         window.open(url, '_blank');
@@ -147,58 +147,94 @@
         });
     }
 
-    function YouTubeEnhancerFullSizedGetVideoId() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('v');
-    }
-
     function YouTubeEnhancerFullSizedAddOrUpdateImage() {
-        const newVideoId = YouTubeEnhancerFullSizedGetVideoId();
-        if (newVideoId && newVideoId !== YouTubeEnhancerFullSizedCurrentVideoId) {
-            YouTubeEnhancerFullSizedCurrentVideoId = newVideoId;
-            const targetElement = document.querySelector('#secondary-inner #panels');
-            if (targetElement) {
-                let img = document.getElementById('YouTubeEnhancerFullSized-custom-image');
-                if (!img) {
-                    img = document.createElement('img');
-                    img.id = 'YouTubeEnhancerFullSized-custom-image';
-                    targetElement.parentNode.insertBefore(img, targetElement);
-                    
-                    img.addEventListener('click', () => {
-                        const maxResUrl = `https://i.ytimg.com/vi/${YouTubeEnhancerFullSizedCurrentVideoId}/maxresdefault.jpg`;
-                        YouTubeEnhancerFullSizedOpenImage(maxResUrl);
-                    });
-                }
-                img.src = `https://i.ytimg.com/vi/${YouTubeEnhancerFullSizedCurrentVideoId}/mqdefault.jpg`;
-            }
+        const newVideoId = new URLSearchParams(window.location.search).get('v');
+        
+        if (!newVideoId || newVideoId === YouTubeEnhancerFullSizedCurrentVideoId) {
+            return;
         }
+
+        YouTubeEnhancerFullSizedCurrentVideoId = newVideoId;
+
+        function attemptInsertion() {
+            const targetElement = document.querySelector('#secondary-inner #panels');
+            const existingImg = document.getElementById('YouTubeEnhancerFullSized-custom-image');
+            
+            if (existingImg) {
+                existingImg.src = `https://i.ytimg.com/vi/${YouTubeEnhancerFullSizedCurrentVideoId}/mqdefault.jpg`;
+                thumbnailInsertionAttempts = 0;
+                return;
+            }
+
+            if (!targetElement) {
+                thumbnailInsertionAttempts++;
+                if (thumbnailInsertionAttempts < MAX_ATTEMPTS) {
+                    setTimeout(attemptInsertion, RETRY_DELAY);
+                } else {
+                    thumbnailInsertionAttempts = 0;
+                }
+                return;
+            }
+
+            const img = document.createElement('img');
+            img.id = 'YouTubeEnhancerFullSized-custom-image';
+            img.src = `https://i.ytimg.com/vi/${YouTubeEnhancerFullSizedCurrentVideoId}/mqdefault.jpg`;
+            img.addEventListener('click', () => {
+                const maxResUrl = `https://i.ytimg.com/vi/${YouTubeEnhancerFullSizedCurrentVideoId}/maxresdefault.jpg`;
+                window.open(maxResUrl, '_blank');
+            });
+
+            targetElement.parentNode.insertBefore(img, targetElement);
+            thumbnailInsertionAttempts = 0;
+        }
+
+        attemptInsertion();
     }
 
     function YouTubeEnhancerFullSizedObservePageChanges() {
-        const observer = new MutationObserver((mutations) => {
+        const contentObserver = new MutationObserver(() => {
             YouTubeEnhancerFullSizedProcessAvatars();
             YouTubeEnhancerFullSizedProcessChannelBanners();
             YouTubeEnhancerFullSizedProcessVideoThumbnails();
-            YouTubeEnhancerFullSizedAddOrUpdateImage();
         });
 
-        observer.observe(document.body, {
+        const panelObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList' && 
+                    (mutation.target.id === 'secondary' || 
+                     mutation.target.id === 'secondary-inner')) {
+                    YouTubeEnhancerFullSizedAddOrUpdateImage();
+                }
+            }
+        });
+
+        contentObserver.observe(document.body, {
             childList: true,
             subtree: true
         });
+
+        const observeSecondary = () => {
+            const secondary = document.getElementById('secondary');
+            if (secondary) {
+                panelObserver.observe(secondary, {
+                    childList: true,
+                    subtree: true
+                });
+            } else {
+                setTimeout(observeSecondary, 1000);
+            }
+        };
+        
+        observeSecondary();
     }
 
     YouTubeEnhancerFullSizedProcessAvatars();
     YouTubeEnhancerFullSizedProcessChannelBanners();
     YouTubeEnhancerFullSizedProcessVideoThumbnails();
     YouTubeEnhancerFullSizedAddOrUpdateImage();
-
     YouTubeEnhancerFullSizedObservePageChanges();
 
     window.addEventListener('yt-navigate-finish', () => {
-        YouTubeEnhancerFullSizedProcessAvatars();
-        YouTubeEnhancerFullSizedProcessChannelBanners();
-        YouTubeEnhancerFullSizedProcessVideoThumbnails();
         YouTubeEnhancerFullSizedAddOrUpdateImage();
     });
     console.log('YouTube Enhancer (Full-Sized Image Preview) is running');

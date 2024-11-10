@@ -192,3 +192,11 @@ Adds an overlay to YouTube channel banners showing real-time subscriber count.
 ![realtime_subs_set](https://github.com/user-attachments/assets/be130b58-3429-4810-9722-64bdee95c610)
 
 #### Thanks to [livecounts.io](https://livecounts.io/?)
+
+## 13. YouTube Enhancer (Subtitle Downloader)
+
+Allows you to download available subtitles for YouTube videos in various languages directly from the video page.
+
+#### [Install Script](https://update.greasyfork.org/scripts/516645/YouTube%20Enhancer%20%28Subtitle%20Downloader%29.user.js)
+
+![subtitles](https://github.com/user-attachments/assets/a3ba10a2-0e94-44fa-9aff-33d6f228493a)

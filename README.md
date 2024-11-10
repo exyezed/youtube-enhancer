@@ -197,6 +197,9 @@ Adds an overlay to YouTube channel banners showing real-time subscriber count.
 
 Allows you to download available subtitles for YouTube videos in various languages directly from the video page.
 
+> [!WARNING]
+> Avoid using AdGuard Desktop, as it can interfere with fetching subtitles and result in incomplete downloads.
+
 #### [Install Script](https://update.greasyfork.org/scripts/516645/YouTube%20Enhancer%20%28Subtitle%20Downloader%29.user.js)
 
 ![subtitles](https://github.com/user-attachments/assets/a3ba10a2-0e94-44fa-9aff-33d6f228493a)

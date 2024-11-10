@@ -154,6 +154,10 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 ![stream_stats](https://github.com/user-attachments/assets/fc080770-314c-40d3-9f1c-f128a803202b)
 
+> Display total views for Shorts videos.
+
+![image](https://github.com/user-attachments/assets/02ced8cc-9db9-4c91-bd6f-fccdba2ece19)
+
 ## 11. YouTube Enhancer (Video Secret Stats)
 
 Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.

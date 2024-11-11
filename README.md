@@ -68,11 +68,11 @@ Integrating clickable badges that reveal the total views for all video types and
 
 > Compact Mode
 
-![view_compact](https://github.com/user-attachments/assets/aae7e890-df36-43f1-892e-74c1c999aa6f)
+![short_views](https://github.com/user-attachments/assets/1b9338c9-39d1-426f-b460-0a0344c0d431)
 
 > Detail Mode
 
-![view_full](https://github.com/user-attachments/assets/c36645bf-bb68-4f2a-b545-8161a60f2d52)
+![detail_views](https://github.com/user-attachments/assets/176e0a7b-c79c-46de-b3b6-6366f3a93cf9)
 
 > Shorts Video
 
@@ -80,17 +80,11 @@ Integrating clickable badges that reveal the total views for all video types and
 
 ## 6. YouTube Enhancer (Extras)
 
-**Highly recommended.** Addition for the YouTube Enhancer script (Reveal Views & Upload Time).
+Replace the YouTube logo with the Enhanced logo.
 
 #### [Install Script](https://update.greasyfork.org/scripts/513153/YouTube%20Enhancer%20%28Extras%29.user.js)
 
-> Before
-
-![before](https://github.com/user-attachments/assets/60e89c83-9abb-4715-b9f2-a3ba78649b3e)
-
-> After
-
-![after](https://github.com/user-attachments/assets/98aaec82-a6bc-40e1-9006-15046ed4f379)
+![image](https://github.com/user-attachments/assets/a720a295-ab7e-45c3-a9aa-515082a1c990)
 
 ## 7. YouTube Enhancer (Reveal Video Category)
 

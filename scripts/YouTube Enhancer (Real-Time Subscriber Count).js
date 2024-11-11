@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Real-Time Subscriber Count)
 // @description  Adds an overlay to YouTube channel banners showing real-time subscriber count.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -469,30 +469,81 @@
 
     async function fetchChannelId(channelName) {
         try {
-            const data = await fetchWithGM(`${API_BASE_URL}${channelName}`);
-            return data.channel_id;
+            const response = await fetchWithGM(`${API_BASE_URL}${channelName}`);
+            if (!response || !response.channel_id) {
+                throw new Error('Invalid channel ID response');
+            }
+            return response.channel_id;
         } catch (error) {
             console.error('Error fetching channel ID:', error);
-            throw error;
+            
+            const metaTag = document.querySelector('meta[itemprop="channelId"]');
+            if (metaTag && metaTag.content) {
+                return metaTag.content;
+            }
+            
+            const urlMatch = window.location.href.match(/channel\/(UC[\w-]+)/);
+            if (urlMatch && urlMatch[1]) {
+                return urlMatch[1];
+            }
+            
+            throw new Error('Could not determine channel ID');
         }
     }
-
+    
     async function fetchChannelStats(channelId) {
         try {
-            const stats = await fetchWithGM(
-                `${STATS_API_URL}${channelId}`,
-                {
-                    origin: "https://livecounts.io",
-                    referer: "https://livecounts.io/",
+            let retries = 3;
+            let lastError;
+            
+            while (retries > 0) {
+                try {
+                    const stats = await fetchWithGM(
+                        `${STATS_API_URL}${channelId}`,
+                        {
+                            origin: "https://livecounts.io",
+                            referer: "https://livecounts.io/",
+                        }
+                    );
+                    
+                    if (!stats || typeof stats.followerCount === 'undefined') {
+                        throw new Error('Invalid stats response');
+                    }
+                    
+                    lastSuccessfulStats.set(channelId, stats);
+                    return stats;
+                } catch (e) {
+                    lastError = e;
+                    retries--;
+                    if (retries > 0) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
                 }
-            );
-            lastSuccessfulStats.set(channelId, stats);
-            return stats;
-        } catch (error) {
-            console.error('Error fetching channel stats:', error);
+            }
+            
             if (lastSuccessfulStats.has(channelId)) {
                 return lastSuccessfulStats.get(channelId);
             }
+            
+            const fallbackStats = {
+                followerCount: 0,
+                bottomOdos: [0, 0],
+                error: true
+            };
+            
+            const subCountElem = document.querySelector('#subscriber-count');
+            if (subCountElem) {
+                const subText = subCountElem.textContent;
+                const subMatch = subText.match(/[\d,]+/);
+                if (subMatch) {
+                    fallbackStats.followerCount = parseInt(subMatch[0].replace(/,/g, ''));
+                }
+            }
+            
+            return fallbackStats;
+            
+        } catch (error) {
+            console.error('Error fetching channel stats:', error);
             throw error;
         }
     }
@@ -698,17 +749,28 @@
         overlay.style.display = 'flex';
     }
 
-    // Main Functions
     async function updateOverlayContent(overlay, channelName) {
         if (isUpdating || channelName !== currentChannelName) return;
         isUpdating = true;
-
+        
         try {
             const channelId = await fetchChannelId(channelName);
             const stats = await fetchChannelStats(channelId);
-
+            
             if (channelName !== currentChannelName) {
                 isUpdating = false;
+                return;
+            }
+            
+            if (stats.error) {
+                const containers = overlay.querySelectorAll('[class$="-number"]');
+                containers.forEach(container => {
+                    if (container.classList.contains('subscribers-number') && stats.followerCount > 0) {
+                        updateDigits(container, stats.followerCount);
+                    } else {
+                        container.textContent = '---';
+                    }
+                });
                 return;
             }
 
@@ -716,34 +778,39 @@
                 const numberContainer = overlay.querySelector(`.${className}-number`);
                 const differenceElement = overlay.querySelector(`.${className}-difference`);
                 const labelElement = overlay.querySelector(`.${className}-label`);
-
+                
                 if (numberContainer) {
                     updateDigits(numberContainer, value);
                 }
-
+                
                 if (differenceElement && previousStats.has(channelId)) {
                     const previousValue = className === 'subscribers' ?
                         previousStats.get(channelId).followerCount :
                         previousStats.get(channelId).bottomOdos[className === 'views' ? 0 : 1];
                     updateDifferenceElement(differenceElement, value, previousValue);
                 }
-
+                
                 if (labelElement) {
                     labelElement.textContent = label;
                 }
             };
-
+            
             updateElement('subscribers', stats.followerCount, 'Subscribers');
             updateElement('views', stats.bottomOdos[0], 'Views');
             updateElement('videos', stats.bottomOdos[1], 'Videos');
-
+            
             if (!previousStats.has(channelId)) {
                 showContent(overlay);
             }
-
+            
             previousStats.set(channelId, stats);
+            
         } catch (error) {
             console.error(`Error updating overlay: ${error.message}`);
+            const containers = overlay.querySelectorAll('[class$="-number"]');
+            containers.forEach(container => {
+                container.textContent = '---';
+            });
         } finally {
             isUpdating = false;
         }

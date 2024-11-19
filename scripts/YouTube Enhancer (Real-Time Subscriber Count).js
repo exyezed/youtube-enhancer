@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Real-Time Subscriber Count)
 // @description  Adds an overlay to YouTube channel banners showing real-time subscriber count.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.1
+// @version      1.2
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -606,24 +606,22 @@
             digits.unshift(newValueStr.slice(start, i + 1));
         }
     
-        const totalElements = digits.join(',').length;
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+        
+        let digitIndex = 0;
     
-        if (container.children.length !== totalElements) {
-            container.innerHTML = '';
-            
-            let digitIndex = 0;
-    
-            for (let i = 0; i < digits.length; i++) {
-                const group = digits[i];
-                for (let j = 0; j < group.length; j++) {
-                    const digitElement = createDigitElement();
-                    digitElement.textContent = '0';
-                    container.appendChild(digitElement);
-                    digitIndex++;
-                }
-                if (i < digits.length - 1) {
-                    container.appendChild(createCommaElement());
-                }
+        for (let i = 0; i < digits.length; i++) {
+            const group = digits[i];
+            for (let j = 0; j < group.length; j++) {
+                const digitElement = createDigitElement();
+                digitElement.textContent = group[j];
+                container.appendChild(digitElement);
+                digitIndex++;
+            }
+            if (i < digits.length - 1) {
+                container.appendChild(createCommaElement());
             }
         }
     

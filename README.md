@@ -12,6 +12,8 @@
 
 Revealing the channel ID, displayed next to the channel handle.
 
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513116-youtube-enhancer-reveal-channel-id)
+
 #### [Install Script](https://update.greasyfork.org/scripts/513116/YouTube%20Enhancer%20%28Reveal%20Channel%20ID%29.user.js)
 
 ![channel_id](https://github.com/user-attachments/assets/4f7998c9-79fa-4538-bc5f-cc21caba9329)
@@ -19,6 +21,8 @@ Revealing the channel ID, displayed next to the channel handle.
 ## 2. YouTube Enhancer (Full-Sized Image Preview)
 
 Viewing original video thumbnails, avatars, and channel banners, with a thumbnail preview above the panel.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513113-youtube-enhancer-full-sized-image-preview)
 
 #### [Install Script](https://update.greasyfork.org/scripts/513113/YouTube%20Enhancer%20%28Full-Sized%20Image%20Preview%29.user.js)
 
@@ -42,6 +46,8 @@ Viewing original video thumbnails, avatars, and channel banners, with a thumbnai
 
 Viewing original shorts thumbnails.
 
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513132-youtube-enhancer-shorts-thumbnail)
+
 #### [Install Script](https://update.greasyfork.org/scripts/513132/YouTube%20Enhancer%20%28Shorts%20Thumbnail%29.user.js)
 
 ![shorts_thumbnail](https://github.com/user-attachments/assets/e4d85085-a0de-42bd-bbb2-9ee597e59b86)
@@ -49,6 +55,8 @@ Viewing original shorts thumbnails.
 ## 4. YouTube Enhancer (Loop & Screenshot Button)
 
 Integrating loop and screenshot buttons into the video and shorts player to enhance user functionality.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513114-youtube-enhancer-loop-screenshot-button)
 
 #### [Install Script](https://update.greasyfork.org/scripts/513114/YouTube%20Enhancer%20%28Loop%20%20Screenshot%20Button%29.user.js)
 
@@ -63,6 +71,8 @@ Integrating loop and screenshot buttons into the video and shorts player to enha
 ## 5. YouTube Enhancer (Reveal Views & Upload Time)
 
 Integrating clickable badges that reveal the total views for all video types and detailed upload times.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513133-youtube-enhancer-reveal-views-upload-time)
 
 #### [Install Script](https://update.greasyfork.org/scripts/513133/YouTube%20Enhancer%20%28Reveal%20Views%20%20Upload%20Time%29.user.js)
 
@@ -82,6 +92,8 @@ Integrating clickable badges that reveal the total views for all video types and
 
 Replace the YouTube logo with the Enhanced logo.
 
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513153-youtube-enhancer-extras)
+
 #### [Install Script](https://update.greasyfork.org/scripts/513153/YouTube%20Enhancer%20%28Extras%29.user.js)
 
 ![image](https://github.com/user-attachments/assets/a720a295-ab7e-45c3-a9aa-515082a1c990)
@@ -89,6 +101,8 @@ Replace the YouTube logo with the Enhanced logo.
 ## 7. YouTube Enhancer (Reveal Video Category)
 
 Revealing the video category.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513134-youtube-enhancer-reveal-video-category)
 
 #### [Install Script](https://update.greasyfork.org/scripts/513134/YouTube%20Enhancer%20%28Reveal%20Video%20Category%29.user.js)
 
@@ -104,6 +118,8 @@ Revealing the video category.
 
 Automatically counts and displays the total number of videos, shorts, and live streams.
 
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513490-youtube-enhancer-channel-video-counters)
+
 #### [Install Script](https://update.greasyfork.org/scripts/513490/YouTube%20Enhancer%20%28Channel%20Video%20Counters%29.user.js)
 
 ![video_counts](https://github.com/user-attachments/assets/f572f340-5510-4400-8276-0971f8ae605c)
@@ -111,6 +127,8 @@ Automatically counts and displays the total number of videos, shorts, and live s
 ## 9. YouTube Enhancer (Reveal Country Flag)
 
 Display country flags for YouTube channels and videos.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/515505-youtube-enhancer-reveal-country-flag)
 
 #### [Install Script](https://update.greasyfork.org/scripts/515505/YouTube%20Enhancer%20%28Reveal%20Country%20Flag%29.user.js)
 
@@ -129,6 +147,8 @@ Display country flags for YouTube channels and videos.
 ## 10. YouTube Enhancer (Secret Stats)
 
 Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel page, directing users to detailed analytics pages for insights into the channel.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513154-youtube-enhancer-secret-stats)
 
 #### [Install Script](https://update.greasyfork.org/scripts/513154/YouTube%20Enhancer%20%28Secret%20Stats%29.user.js)
 
@@ -156,6 +176,8 @@ Integrating **"Secret Stats"** and **"Stream Stats"** buttons into the channel p
 
 Integrating clickable badges on video and shorts pages that direct users to detailed statistics for each video.
 
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/513155-youtube-enhancer-video-secret-stats)
+
 #### [Install Script](https://update.greasyfork.org/scripts/513155/YouTube%20Enhancer%20%28Video%20Secret%20Stats%29.user.js)
 
 ### Video Stats
@@ -178,6 +200,8 @@ Integrating clickable badges on video and shorts pages that direct users to deta
 
 Adds an overlay to YouTube channel banners showing real-time subscriber count.
 
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/516477-youtube-enhancer-real-time-subscriber-count)
+
 > [!WARNING]
 > Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
 
@@ -194,6 +218,8 @@ Adds an overlay to YouTube channel banners showing real-time subscriber count.
 ## 13. YouTube Enhancer (Subtitle Downloader)
 
 Allows you to download available subtitles for YouTube videos in various languages directly from the video page.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.agreasyfork.org/en/scripts/516645-youtube-enhancer-subtitle-downloader)
 
 > [!WARNING]
 > Avoid using AdGuard Desktop, as it can interfere with fetching subtitles and result in incomplete downloads.

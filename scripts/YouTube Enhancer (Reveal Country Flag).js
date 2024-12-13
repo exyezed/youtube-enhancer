@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Display country flags for YouTube channels, videos and shorts.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -88,7 +88,7 @@
                         if (response.status >= 200 && response.status < 300) {
                             try {
                                 const data = JSON.parse(response.responseText);
-                                const countryCode = data.country.toLowerCase() || 'unknown';
+                                const countryCode = data && data.country ? data.country.toLowerCase() : 'unknown';
                                 setToCache(type, id, countryCode);
                                 resolve(countryCode);
                             } catch (error) {
@@ -102,6 +102,10 @@
                     },
                     onerror: function(error) {
                         console.error('Request error:', error);
+                        resolve('unknown');
+                    },
+                    ontimeout: function() {
+                        console.error('Request timed out');
                         resolve('unknown');
                     }
                 });

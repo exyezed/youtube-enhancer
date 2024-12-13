@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Channel ID)
 // @description  Revealing the channel ID, displayed next to the channel handle.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.1
+// @version      1.2
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -45,6 +45,10 @@
         return channelTabs.some(tab => path.includes(tab));
     }
 
+    function isWatchPage() {
+        return window.location.pathname.startsWith('/watch');
+    }
+
     function waitForElement(selector, timeout = 5000) {
         return new Promise((resolve, reject) => {
             const element = getChannelNameElement();
@@ -73,6 +77,10 @@
     }
 
     async function addChannelId() {
+        if (isWatchPage()) {
+            return;
+        }
+
         try {
             const channelNameElement = await waitForElement();
             
@@ -148,7 +156,7 @@
         lastProcessedChannelName = '';
         isRequestInProgress = false;
         
-        if (isChannelPage() || document.querySelector('ytd-watch-flexy')) {
+        if (isChannelPage() && !isWatchPage()) {
             addChannelId();
         }
     }
@@ -158,7 +166,7 @@
             if (mutation.target.nodeName === 'YTD-APP') {
                 handleNavigation();
             }
-            else if (isChannelPage() || document.querySelector('ytd-watch-flexy')) {
+            else if (isChannelPage() && !isWatchPage()) {
                 addChannelId();
             }
         }

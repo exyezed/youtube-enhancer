@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Loop & Screenshot Button)
 // @description  Integrating loop and screenshot buttons into the video and shorts player to enhance user functionality.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -14,11 +14,10 @@
 (function() {
     'use strict';
 
-    // Configuration
     const YouTubeEnhancerLoopScreenshotConfig = {
         screenshotFormat: "png",
         extension: 'png',
-        screenshotFunctionality: 2, // 0: download, 1: clipboard, 2: both
+        screenshotFunctionality: 2,
         clickDuration: 200
     };
 
@@ -371,7 +370,7 @@
         waitForControls() {
             return new Promise((resolve, reject) => {
                 let attempts = 0;
-                const maxAttempts = 50; // 5 seconds maximum wait time
+                const maxAttempts = 50;
                 
                 const checkControls = () => {
                     const controls = document.querySelector('div.ytp-left-controls');

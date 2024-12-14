@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Video Category)
 // @description  Revealing the video category.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -84,7 +84,6 @@
                     categoryElement.style.color = '#fff';
                     titleElement.insertBefore(categoryElement, titleElement.firstChild);
                     
-                    // Fetch and update category for Shorts
                     const shortsVideoId = getShortsVideoId();
                     if (shortsVideoId) {
                         fetchVideoCategory(shortsVideoId, categoryElement, true);
@@ -137,10 +136,10 @@
         observePageChanges();
     }
 
-    // Run the script when the page is loaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
+    console.log('YouTube Enhancer (Reveal Video Category) is running');
 })();

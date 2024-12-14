@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Channel Video Counters)
 // @description  Automatically counts and displays the total number of videos, shorts, and live streams.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -54,7 +54,6 @@
             }
         });
     
-        // Update slider width and position after changing tab text
         updateSlider();
     }
 
@@ -109,7 +108,6 @@
         }
     }
 
-    // Use MutationObserver to handle dynamic content loading
     const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             if (mutation.type === 'childList') {
@@ -126,7 +124,6 @@
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Watch for URL changes
     let lastUrl = location.href;
     new MutationObserver(() => {
         const url = location.href;
@@ -136,7 +133,6 @@
         }
     }).observe(document, {subtree: true, childList: true});
 
-    // Watch for tab changes and window resize
     new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'aria-selected') {
@@ -147,6 +143,6 @@
 
     window.addEventListener('resize', updateSlider);
 
-    // Initial call to init() in case the content is already loaded
     init();
+    console.log('YouTube Enhancer (Channel Video Counters) is running');
 })();

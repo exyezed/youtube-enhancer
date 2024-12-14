@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Display country flags for YouTube channels, videos and shorts.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.4
+// @version      1.5
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -137,7 +137,6 @@
     }
 
     async function addFlag() {
-        // Channel
         const channelElement = document.querySelector('.dynamic-text-view-model-wiz__h1 .yt-core-attributed-string');
         if (channelElement && !processedElements.has(channelElement)) {
             removeExistingFlags(channelElement.parentElement);
@@ -153,7 +152,6 @@
             );
         }
 
-        // Video
         const videoElement = document.querySelector('#title yt-formatted-string');
         if (videoElement && !processedElements.has(videoElement)) {
             const videoParent = videoElement.closest('#title h1');
@@ -172,7 +170,6 @@
             }
         }
 
-        // Shorts
         const shortsChannelElements = document.querySelectorAll('.YtReelChannelBarViewModelChannelName');
         shortsChannelElements.forEach(async element => {
             if (!processedElements.has(element)) {

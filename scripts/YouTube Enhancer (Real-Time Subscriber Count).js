@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Real-Time Subscriber Count)
 // @description  Adds an overlay to YouTube channel banners showing real-time subscriber count.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -14,7 +14,6 @@
 (function() {
     'use strict';
 
-    // Constants
     const OPTIONS = ['subscribers', 'views', 'videos'];
     const FONT_LINK = "https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap";
     const API_BASE_URL = 'https://exyezed.vercel.app/api/channel/';
@@ -22,7 +21,6 @@
     const DEFAULT_UPDATE_INTERVAL = 2000;
     const DEFAULT_OVERLAY_OPACITY = 0.75;
 
-    // Global variables
     let overlay = null;
     let isUpdating = false;
     let intervalId = null;
@@ -33,7 +31,6 @@
     const lastSuccessfulStats = new Map();
     const previousStats = new Map();
 
-    // Initialization
     function init() {
         loadFonts();
         initializeLocalStorage();
@@ -111,7 +108,6 @@
         document.head.appendChild(style);
     }
 
-    // UI Components
     function createSettingsButton() {
         const button = document.createElement('div');
         button.className = 'settings-button';
@@ -446,7 +442,6 @@
         return overlay;
     }
 
-    // Helper Functions
     function fetchWithGM(url, headers = {}) {
         return new Promise((resolve, reject) => {
             GM_xmlhttpRequest({
@@ -876,7 +871,6 @@
         });
     }
 
-    // Initialize the script
     init();
     console.log('YouTube Enhancer (Real-Time Subscriber Count) is running');
 })();

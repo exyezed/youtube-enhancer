@@ -6,7 +6,7 @@
 > [!WARNING]
 > If you see an error or the feature doesn't appear, try refreshing the page a few times. I'm using a public API that may require updates in the future with a free server that is not as responsive as premium services, and my knowledge of JavaScript is still very limited and needs further improvement. If you encounter any issues and can fix them, please feel free to make Pull Requests.
 
-#### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed) | [OpenUserJS](https://openuserjs.org/users/exyezed/scripts)
+### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed)
 
 ![Total Installs](https://img.shields.io/badge/dynamic/json?color=%230072C6&label=Total%20Installs&query=$&url=https://forksinstalls.vercel.app/total/greasyfork.org/en/users/1382928-exyezed)
 

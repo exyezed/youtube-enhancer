@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Full-Sized Image Preview)
 // @description  Viewing original video thumbnails, avatars, and channel banners, with a thumbnail preview above the panel.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -42,7 +42,7 @@
         #YouTubeEnhancerFullSized-custom-image {
             width: 100%;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             box-sizing: border-box;
             border-radius: 10px;
             cursor: pointer;
@@ -72,6 +72,15 @@
     let thumbnailInsertionAttempts = 0;
     const MAX_ATTEMPTS = 10;
     const RETRY_DELAY = 500;
+
+    function isWatchPage() {
+        const url = new URL(window.location.href);
+        return url.pathname === '/watch' && (
+            url.searchParams.has('v') || 
+            url.searchParams.has('list') || 
+            url.searchParams.has('start_radio')
+        );
+    }
 
     function YouTubeEnhancerFullSizedOpenImage(url) {
         window.open(url, '_blank');
@@ -113,10 +122,9 @@
         const avatars = document.querySelectorAll('yt-avatar-shape img, yt-img-shadow#avatar img');
         avatars.forEach(img => {
             if (!img.closest('.YouTubeEnhancerFullSized-container')) {
-                const isWatchPage = window.location.pathname.startsWith('/watch');
                 YouTubeEnhancerFullSizedAddButton(img, (src) => src.replace(/=s\d+-c-k-c0x00ffffff-no-rj.*/, '=s0'));
                 
-                if (isWatchPage) {
+                if (isWatchPage()) {
                     const button = img.closest('.YouTubeEnhancerFullSized-container').querySelector('.YouTubeEnhancerFullSized-button');
                     if (button) {
                         button.style.display = 'none';

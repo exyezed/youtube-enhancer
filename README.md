@@ -229,3 +229,15 @@ Allows you to download available subtitles for YouTube videos in various languag
 #### [Install Script](https://update.greasyfork.org/scripts/516645/YouTube%20Enhancer%20%28Subtitle%20Downloader%29.user.js)
 
 ![subtitles](https://github.com/user-attachments/assets/a3ba10a2-0e94-44fa-9aff-33d6f228493a)
+
+## 14. YouTube Enhancer (Monetization Checker)
+
+Checks the monetization status of YouTube channels.
+
+![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.app/greasyfork.org/en/scripts/527269-youtube-enhancer-monetization-checker)
+
+#### [Install Script](https://update.greasyfork.org/scripts/527269-youtube-enhancer-monetization-checker)
+
+![image](https://github.com/user-attachments/assets/deffa609-3423-4975-87ed-37b37f27fabb)
+
+![image](https://github.com/user-attachments/assets/0645f5ae-4a7f-4737-9b41-77be43bd0386)

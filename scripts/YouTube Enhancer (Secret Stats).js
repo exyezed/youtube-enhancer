@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Secret Stats)
 // @description  Integrates "Secret Stats" and "Stream Stats" buttons into the channel page, providing access to detailed analytics and displaying total Shorts views for deeper insights.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -181,7 +181,7 @@
     async function fetchAndUpdateShortsStats(shortsStatsElement) {
         const identifier = getChannelIdentifier();
         if (!identifier || !shortsStatsElement) return;
-
+    
         const cachedData = getCachedData(identifier);
         if (cachedData) {
             const statsText = shortsStatsElement.querySelector('.shorts-stats-text');
@@ -190,11 +190,12 @@
             }
             return;
         }
-
+    
         try {
             GM.xmlHttpRequest({
                 method: 'GET',
                 url: `https://exyezed.vercel.app/api/shorts/${identifier}`,
+                timeout: 60000, // Increase timeout to 60 seconds
                 onload: function(response) {
                     try {
                         if (response.status !== 200) {
@@ -214,6 +215,10 @@
                 },
                 onerror: function(error) {
                     console.error('Error fetching shorts stats:', error);
+                    updateStatsError(shortsStatsElement);
+                },
+                ontimeout: function() {
+                    console.error('Request timed out');
                     updateStatsError(shortsStatsElement);
                 }
             });

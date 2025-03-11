@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTube Enhancer (Reveal Country Flag)
-// @description  Display country flags for YouTube channels, videos and shorts.
+// @description  Reveal Country Flag.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.5
+// @version      1.6
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -17,7 +17,7 @@
     'use strict';
 
     const FLAG_CONFIG = {
-        BASE_URL: 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/7.2.3/flags/4x3/',
+        BASE_URL: 'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/flags/4x3/',
         SIZES: {
             channel: '28px',
             video: '22px',
@@ -29,10 +29,6 @@
             shorts: '8px'
         }
     };
-
-    const COUNTRY_NAMES = {
-        'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire, Sint Eustatius and Saba', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei Darussalam', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cg': 'Congo', 'cd': 'Congo, Democratic Republic of the', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island and McDonald Islands', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'je': 'Jersey', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Lao People\'s Democratic Republic', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mk': 'North Macedonia', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine, State of', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'ro': 'Romania', 'ru': 'Russian Federation', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena, Ascension and Tristan da Cunha', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent and the Grenadines', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia and the South Sandwich Islands', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard and Jan Mayen', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syrian Arab Republic', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'th': 'Thailand', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'us': 'United States', 'um': 'United States Minor Outlying Islands', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Viet Nam', 'vg': 'Virgin Islands', 'vi': 'Virgin Islands', 'wf': 'Wallis and Futuna', 'eh': 'Western Sahara', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe'
-    };    
 
     const CACHE_CONFIG = {
         PREFIX: 'yt_enhancer_',
@@ -71,16 +67,16 @@
         GM_setValue(cacheKey, JSON.stringify(cacheData));
     }
 
-    async function getCountryCode(type, id) {
+    async function getCountryData(type, id) {
         const cachedValue = getFromCache(type, id);
         if (cachedValue) {
             return cachedValue;
         }
 
-        const url = `https://exyezed.vercel.app/api/${type}/${id}`;
+        const url = `https://flagscountry.vercel.app/api/${type}/${id}`;
 
         if (typeof GM_xmlhttpRequest !== 'undefined') {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 GM_xmlhttpRequest({
                     method: 'GET',
                     url: url,
@@ -88,45 +84,46 @@
                         if (response.status >= 200 && response.status < 300) {
                             try {
                                 const data = JSON.parse(response.responseText);
-                                const countryCode = data && data.country ? data.country.toLowerCase() : 'unknown';
-                                setToCache(type, id, countryCode);
-                                resolve(countryCode);
+                                const countryData = {
+                                    code: data.country.toLowerCase(),
+                                    name: data.countryName
+                                };
+                                setToCache(type, id, countryData);
+                                resolve(countryData);
                             } catch (error) {
                                 console.error('Error parsing JSON:', error);
-                                resolve('unknown');
+                                resolve(null);
                             }
                         } else {
                             console.error('Request failed:', response.status);
-                            resolve('unknown');
+                            resolve(null);
                         }
                     },
                     onerror: function(error) {
                         console.error('Request error:', error);
-                        resolve('unknown');
+                        resolve(null);
                     },
                     ontimeout: function() {
                         console.error('Request timed out');
-                        resolve('unknown');
+                        resolve(null);
                     }
                 });
             });
         } else {
-            return 'unknown';
+            return null;
         }
     }
 
-    function createFlag(size, margin, className, countryCode) {
+    function createFlag(size, margin, className, countryData) {
         const flag = document.createElement('img');
-        flag.src = `${FLAG_CONFIG.BASE_URL}${countryCode === 'unknown' ? 'xx' : countryCode}.svg`;
+        flag.src = `${FLAG_CONFIG.BASE_URL}${countryData.code}.svg`;
         flag.className = `country-flag ${className}`;
         flag.style.width = size;
         flag.style.height = 'auto';
         flag.style.marginLeft = margin;
         flag.style.verticalAlign = 'middle';
         flag.style.cursor = 'pointer';
-        flag.title = countryCode === 'unknown' 
-            ? 'Country Not Set'
-            : (COUNTRY_NAMES[countryCode] || countryCode.toUpperCase());
+        flag.title = countryData.name;
         
         return flag;
     }
@@ -146,10 +143,12 @@
                 ? channelUrl.split('@')[1].split('/')[0]
                 : channelUrl.split('/')[2];
 
-            const countryCode = await getCountryCode('channel', channelId);
-            channelElement.appendChild(
-                createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryCode)
-            );
+            const countryData = await getCountryData('channel', channelId);
+            if (countryData) {
+                channelElement.appendChild(
+                    createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryData)
+                );
+            }
         }
 
         const videoElement = document.querySelector('#title yt-formatted-string');
@@ -160,26 +159,30 @@
                 processedElements.add(videoElement);
                 const videoId = new URLSearchParams(window.location.search).get('v');
                 if (videoId) {
-                    const countryCode = await getCountryCode('video', videoId);
-                    videoParent.style.display = 'flex';
-                    videoParent.style.alignItems = 'center';
-                    videoParent.appendChild(
-                        createFlag(FLAG_CONFIG.SIZES.video, FLAG_CONFIG.MARGINS.video, 'video-flag', countryCode)
-                    );
+                    const countryData = await getCountryData('video', videoId);
+                    if (countryData) {
+                        videoParent.style.display = 'flex';
+                        videoParent.style.alignItems = 'center';
+                        videoParent.appendChild(
+                            createFlag(FLAG_CONFIG.SIZES.video, FLAG_CONFIG.MARGINS.video, 'video-flag', countryData)
+                        );
+                    }
                 }
             }
         }
 
-        const shortsChannelElements = document.querySelectorAll('.YtReelChannelBarViewModelChannelName');
+        const shortsChannelElements = document.querySelectorAll('.ytReelChannelBarViewModelChannelName');
         shortsChannelElements.forEach(async element => {
             if (!processedElements.has(element)) {
                 removeExistingFlags(element);
                 processedElements.add(element);
                 const shortsId = window.location.pathname.split('/').pop();
-                const countryCode = await getCountryCode('video', shortsId);
-                element.appendChild(
-                    createFlag(FLAG_CONFIG.SIZES.shorts, FLAG_CONFIG.MARGINS.shorts, 'shorts-flag', countryCode)
-                );
+                const countryData = await getCountryData('video', shortsId);
+                if (countryData) {
+                    element.appendChild(
+                        createFlag(FLAG_CONFIG.SIZES.shorts, FLAG_CONFIG.MARGINS.shorts, 'shorts-flag', countryData)
+                    );
+                }
             }
         });
     }
@@ -217,5 +220,4 @@
     } else {
         init();
     }
-    console.log('YouTube Enhancer (Reveal Country Flag) is running');
 })();

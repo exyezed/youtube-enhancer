@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTube Enhancer (Real-Time Subscriber Count)
-// @description  Adds an overlay to YouTube channel banners showing real-time subscriber count.
+// @description  Display Real-Time Subscriber Count.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -16,7 +16,6 @@
 
     const OPTIONS = ['subscribers', 'views', 'videos'];
     const FONT_LINK = "https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap";
-    const API_BASE_URL = 'https://exyezed.vercel.app/api/channel/';
     const STATS_API_URL = 'https://api.livecounts.io/youtube-live-subscriber-counter/stats/';
     const DEFAULT_UPDATE_INTERVAL = 2000;
     const DEFAULT_OVERLAY_OPACITY = 0.75;
@@ -30,6 +29,78 @@
 
     const lastSuccessfulStats = new Map();
     const previousStats = new Map();
+    
+    let previousUrl = location.href;
+    let isChecking = false;
+
+    async function fetchChannel(url) {
+      if (isChecking) return null;
+      isChecking = true;
+      
+      try {
+        const response = await fetch(url, {
+          credentials: 'same-origin'
+        });
+        
+        if (!response.ok) return null;
+        
+        const html = await response.text();
+        const match = html.match(/var ytInitialData = (.+?);<\/script>/);
+        return match && match[1] ? JSON.parse(match[1]) : null;
+      } catch (error) {
+        return null;
+      } finally {
+        isChecking = false;
+      }
+    }
+
+    async function getChannelInfo(url) {
+      const data = await fetchChannel(url);
+      if (!data) return null;
+      
+      try {
+        const channelName = data?.metadata?.channelMetadataRenderer?.title || "Unknown";
+        const channelId = data?.metadata?.channelMetadataRenderer?.externalId || null;
+        
+        return {channelName, channelId};
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function isChannelPageUrl(url) {
+      return url.includes('youtube.com/') && 
+             (url.includes('/channel/') || url.includes('/@')) && 
+             !url.includes('/video/') && 
+             !url.includes('/watch');
+    }
+
+    function checkUrlChange() {
+      const currentUrl = location.href;
+      if (currentUrl !== previousUrl) {
+        previousUrl = currentUrl;
+        if (isChannelPageUrl(currentUrl)) {
+          setTimeout(() => getChannelInfo(currentUrl), 500);
+        }
+      }
+    }
+
+    history.pushState = (function(f) {
+      return function() {
+        f.apply(this, arguments);
+        checkUrlChange();
+      };
+    })(history.pushState);
+
+    history.replaceState = (function(f) {
+      return function() {
+        f.apply(this, arguments);
+        checkUrlChange();
+      };
+    })(history.replaceState);
+
+    window.addEventListener('popstate', checkUrlChange);
+    setInterval(checkUrlChange, 1000);
 
     function init() {
         loadFonts();
@@ -37,6 +108,10 @@
         addStyles();
         observePageChanges();
         addNavigationListener();
+        
+        if (isChannelPageUrl(location.href)) {
+          getChannelInfo(location.href);
+        }
     }
 
     function loadFonts() {
@@ -464,14 +539,23 @@
 
     async function fetchChannelId(channelName) {
         try {
-            const response = await fetchWithGM(`${API_BASE_URL}${channelName}`);
-            if (!response || !response.channel_id) {
-                throw new Error('Invalid channel ID response');
+            const channelInfo = await getChannelInfo(window.location.href);
+            if (channelInfo && channelInfo.channelId) {
+                return channelInfo.channelId;
             }
-            return response.channel_id;
-        } catch (error) {
-            console.error('Error fetching channel ID:', error);
             
+            const metaTag = document.querySelector('meta[itemprop="channelId"]');
+            if (metaTag && metaTag.content) {
+                return metaTag.content;
+            }
+            
+            const urlMatch = window.location.href.match(/channel\/(UC[\w-]+)/);
+            if (urlMatch && urlMatch[1]) {
+                return urlMatch[1];
+            }
+            
+            throw new Error('Could not determine channel ID');
+        } catch (error) {
             const metaTag = document.querySelector('meta[itemprop="channelId"]');
             if (metaTag && metaTag.content) {
                 return metaTag.content;
@@ -538,7 +622,6 @@
             return fallbackStats;
             
         } catch (error) {
-            console.error('Error fetching channel stats:', error);
             throw error;
         }
     }
@@ -799,7 +882,6 @@
             previousStats.set(channelId, stats);
             
         } catch (error) {
-            console.error(`Error updating overlay: ${error.message}`);
             const containers = overlay.querySelectorAll('[class$="-number"]');
             containers.forEach(container => {
                 container.textContent = '---';
@@ -872,5 +954,4 @@
     }
 
     init();
-    console.log('YouTube Enhancer (Real-Time Subscriber Count) is running');
 })();

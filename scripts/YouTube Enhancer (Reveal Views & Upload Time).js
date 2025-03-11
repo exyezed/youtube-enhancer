@@ -1,15 +1,13 @@
 // ==UserScript==
 // @name         YouTube Enhancer (Reveal Views & Upload Time)
-// @description  Integrating clickable badges that reveal the total views for all video types and detailed upload times.
+// @description  Reveal Views & Upload Time.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.1
+// @version      1.2
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
 // @license      MIT
 // @match        https://www.youtube.com/*
-// @grant        GM_xmlhttpRequest
-// @connect      exyezed.vercel.app
 // ==/UserScript==
 
 (function() {
@@ -18,8 +16,7 @@
     const badgeStyles = `
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
         
-        /* Regular video badge styles */
-        #secondary-inner .YouTubeEnhancerRevealViewsUploadTime {
+        #secondary-inner .revealViewsAndUploadTime {
             height: 36px;
             font-size: 14px;
             font-weight: 500;
@@ -36,35 +33,34 @@
             gap: 8px;
             cursor: pointer;
         }
-        html[dark] #secondary-inner .YouTubeEnhancerRevealViewsUploadTime {
+        html[dark] #secondary-inner .revealViewsAndUploadTime {
             background-color: #ffffff1a;
             color: var(--yt-spec-text-primary, #fff);
         }
-        html:not([dark]) #secondary-inner .YouTubeEnhancerRevealViewsUploadTime {
+        html:not([dark]) #secondary-inner .revealViewsAndUploadTime {
             background-color: #0000000d;
             color: var(--yt-spec-text-primary, #030303);
         }
-        html[dark] #secondary-inner .YouTubeEnhancerRevealViewsUploadTime:hover {
+        html[dark] #secondary-inner .revealViewsAndUploadTime:hover {
             background-color: #ffffff33;
         }
-        html:not([dark]) #secondary-inner .YouTubeEnhancerRevealViewsUploadTime:hover {
+        html:not([dark]) #secondary-inner .revealViewsAndUploadTime:hover {
             background-color: #00000014;
         }
-        #secondary-inner .YouTubeEnhancerRevealViewsUploadTime .separator {
+        #secondary-inner .revealViewsAndUploadTime .separator {
             margin: 0 2px;
             width: 1px;
             height: 24px;
             opacity: 0.3;
         }
-        html[dark] #secondary-inner .YouTubeEnhancerRevealViewsUploadTime .separator {
+        html[dark] #secondary-inner .revealViewsAndUploadTime .separator {
             background-color: var(--yt-spec-text-secondary, #aaa);
         }
-        html:not([dark]) #secondary-inner .YouTubeEnhancerRevealViewsUploadTime .separator {
+        html:not([dark]) #secondary-inner .revealViewsAndUploadTime .separator {
             background-color: var(--yt-spec-text-secondary, #606060);
         }
 
-        /* Shorts badge styles - keeping original */
-        .YouTubeEnhancerRevealViewsUploadTime-shorts {
+        .revealViewsAndUploadTime-shorts {
             height: 48px;
             font-size: 14px;
             font-weight: 500;
@@ -81,7 +77,7 @@
             align-items: center;
             gap: 8px;
         }
-        .YouTubeEnhancerRevealViewsUploadTime-shorts .separator {
+        .revealViewsAndUploadTime-shorts .separator {
             margin: 0 2px;
             width: 1px;
             height: 36px;
@@ -89,7 +85,6 @@
             background-color: #fff;
         }
 
-        /* Shared icon styles */
         .material-symbols-outlined {
             font-size: 24px;
             line-height: 1;
@@ -104,7 +99,7 @@
     function createBadge(viewCount, uploadTime, uploadDate, isShorts = false) {
         if (isShorts) {
             const badge = document.createElement('div');
-            badge.className = 'YouTubeEnhancerRevealViewsUploadTime-shorts';
+            badge.className = 'revealViewsAndUploadTime-shorts';
     
             const viewIcon = document.createElement('span');
             viewIcon.className = 'material-symbols-outlined';
@@ -145,7 +140,7 @@
             return badge;
         } else {
             const badge = document.createElement('div');
-            badge.className = 'YouTubeEnhancerRevealViewsUploadTime';
+            badge.className = 'revealViewsAndUploadTime';
     
             const mainIcon = document.createElement('span');
             mainIcon.className = 'material-symbols-outlined';
@@ -191,8 +186,15 @@
     }
 
     function getVideoId() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('v');
+        const urlObj = new URL(window.location.href);
+        if (urlObj.pathname.includes('/watch')) {
+            return urlObj.searchParams.get('v');
+        } else if (urlObj.pathname.includes('/video/')) {
+            return urlObj.pathname.split('/video/')[1];
+        } else if (urlObj.pathname.includes('/shorts/')) {
+            return urlObj.pathname.split('/shorts/')[1];
+        }
+        return null;
     }
 
     function formatNumber(number) {
@@ -233,33 +235,79 @@
         return new Intl.DateTimeFormat('en-GB', options).format(date);
     }
 
-    function fetchVideoInfo(videoId) {
-        const apiUrl = `https://exyezed.vercel.app/api/video/${videoId}`;
+    function getApiKey() {
+        const scripts = document.getElementsByTagName('script');
+        for (const script of scripts) {
+            const match = script.textContent.match(/"INNERTUBE_API_KEY":\s*"([^"]+)"/);
+            if (match && match[1]) return match[1];
+        }
+        return null;
+    }
 
-        return new Promise((resolve, reject) => {
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: apiUrl,
-                onload: function(response) {
-                    if (response.status === 200) {
-                        const data = JSON.parse(response.responseText);
-                        resolve({
-                            viewCount: formatNumber(data.viewCount),
-                            uploadDate: data.uploadDate
-                        });
-                    } else {
-                        reject('API request failed');
-                    }
+    function getClientInfo() {
+        const scripts = document.getElementsByTagName('script');
+        let clientName = null;
+        let clientVersion = null;
+        
+        for (const script of scripts) {
+            const nameMatch = script.textContent.match(/"INNERTUBE_CLIENT_NAME":\s*"([^"]+)"/);
+            const versionMatch = script.textContent.match(/"INNERTUBE_CLIENT_VERSION":\s*"([^"]+)"/);
+            
+            if (nameMatch && nameMatch[1]) clientName = nameMatch[1];
+            if (versionMatch && versionMatch[1]) clientVersion = versionMatch[1];
+        }
+        
+        return { clientName, clientVersion };
+    }
+
+    async function fetchVideoInfo(videoId) {
+        try {
+            const apiKey = getApiKey();
+            if (!apiKey) return null;
+            
+            const { clientName, clientVersion } = getClientInfo();
+            if (!clientName || !clientVersion) return null;
+            
+            const response = await fetch(`https://www.youtube.com/youtubei/v1/player?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-                onerror: function() {
-                    reject('Network error');
-                }
+                body: JSON.stringify({
+                    videoId: videoId,
+                    context: {
+                        client: {
+                            clientName: clientName,
+                            clientVersion: clientVersion,
+                        }
+                    }
+                })
             });
-        });
+            
+            if (!response.ok) return null;
+            const data = await response.json();
+            
+            let viewCount = "Unknown";
+            if (data.videoDetails?.viewCount) {
+                viewCount = formatNumber(data.videoDetails.viewCount);
+            }
+            
+            let publishDate = "Unknown";
+            if (data.microformat?.playerMicroformatRenderer?.publishDate) {
+                publishDate = data.microformat.playerMicroformatRenderer.publishDate;
+            }
+            
+            return {
+                viewCount,
+                uploadDate: publishDate
+            };
+        } catch (error) {
+            return null;
+        }
     }
 
     function updateBadge(viewCount, uploadTime, uploadDate, isShorts = false) {
-        let badge = document.querySelector(isShorts ? '.YouTubeEnhancerRevealViewsUploadTime-shorts' : '.YouTubeEnhancerRevealViewsUploadTime');
+        let badge = document.querySelector(isShorts ? '.revealViewsAndUploadTime-shorts' : '.revealViewsAndUploadTime');
         if (badge) {
             badge.remove();
         }
@@ -269,13 +317,13 @@
     function insertBadge(viewCount, uploadTime, uploadDate, isShorts = false) {
         if (isShorts) {
             const target = document.querySelector('ytd-reel-video-renderer[is-active]');
-            if (target && !document.querySelector('.YouTubeEnhancerRevealViewsUploadTime-shorts')) {
+            if (target && !document.querySelector('.revealViewsAndUploadTime-shorts')) {
                 const badge = createBadge(viewCount, uploadTime, uploadDate, isShorts);
                 target.appendChild(badge);
             }
         } else {
             const targetElement = document.querySelector('#secondary-inner #panels');
-            if (targetElement && !document.querySelector('.YouTubeEnhancerRevealViewsUploadTime')) {
+            if (targetElement && !document.querySelector('.revealViewsAndUploadTime')) {
                 const badge = createBadge(viewCount, uploadTime, uploadDate, isShorts);
                 targetElement.parentNode.insertBefore(badge, targetElement);
             }
@@ -283,9 +331,9 @@
     }
 
     function addStyles() {
-        if (!document.querySelector('#YouTubeEnhancerRevealViewsUploadTime-styles')) {
+        if (!document.querySelector('#revealViewsAndUploadTime-styles')) {
             const styleElement = document.createElement('style');
-            styleElement.id = 'YouTubeEnhancerRevealViewsUploadTime-styles';
+            styleElement.id = 'revealViewsAndUploadTime-styles';
             styleElement.textContent = badgeStyles;
             document.head.appendChild(styleElement);
         }
@@ -295,9 +343,13 @@
         updateBadge('Loading...', 'Loading...', 'Loading...', isShorts);
         try {
             const videoInfo = await fetchVideoInfo(videoId);
-            const uploadTime = formatTime(videoInfo.uploadDate);
-            const formattedUploadDate = formatDate(videoInfo.uploadDate);
-            updateBadge(videoInfo.viewCount, uploadTime, formattedUploadDate, isShorts);
+            if (videoInfo) {
+                const uploadTime = formatTime(videoInfo.uploadDate);
+                const formattedUploadDate = formatDate(videoInfo.uploadDate);
+                updateBadge(videoInfo.viewCount, uploadTime, formattedUploadDate, isShorts);
+            } else {
+                updateBadge('Error', 'Error', 'Error', isShorts);
+            }
         } catch (error) {
             updateBadge('Error', 'Error', 'Error', isShorts);
         }
@@ -308,10 +360,7 @@
         const videoId = getVideoId();
         const isShorts = window.location.pathname.startsWith('/shorts/');
         if (videoId) {
-            updateBadgeWithInfo(videoId, false);
-        } else if (isShorts) {
-            const shortsId = window.location.pathname.split('/')[2];
-            updateBadgeWithInfo(shortsId, true);
+            updateBadgeWithInfo(videoId, isShorts);
         } else {
             updateBadge('N/A', 'N/A', 'N/A', isShorts);
         }
@@ -325,7 +374,7 @@
             if (location.href !== lastUrl) {
                 lastUrl = location.href;
                 const isShorts = window.location.pathname.startsWith('/shorts/');
-                const currentVideoId = isShorts ? window.location.pathname.split('/')[2] : getVideoId();
+                const currentVideoId = getVideoId();
                 if (currentVideoId && currentVideoId !== lastVideoId) {
                     lastVideoId = currentVideoId;
                     updateBadgeWithInfo(currentVideoId, isShorts);
@@ -355,12 +404,11 @@
 
     window.addEventListener('yt-navigate-finish', function() {
         const isShorts = window.location.pathname.startsWith('/shorts/');
-        const videoId = isShorts ? window.location.pathname.split('/')[2] : getVideoId();
+        const videoId = getVideoId();
         if (videoId) {
             updateBadgeWithInfo(videoId, isShorts);
         } else {
             updateBadge('Not a video', 'Not a video', 'Not a video', isShorts);
         }
     });
-    console.log('YouTube Enhancer (Reveal Views & Upload Time) is running');
 })();

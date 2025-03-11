@@ -123,6 +123,10 @@ Add a Stats Button.
 
 ![image](https://github.com/user-attachments/assets/b0a443eb-1f82-4821-8c43-313b4859986d)
 
+> Preview
+
+![chrome_MbYUgRkckR](https://github.com/user-attachments/assets/24e2662a-8686-499c-add4-f7b4bbff81df)
+
 ## 8. Real-Time Subscriber Count
 
 Display Real-Time Subscriber Count.

@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Stats)
 // @description  Add a Stats Button.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.5
+// @version      1.6
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -134,12 +134,21 @@
         }
     }
 
-    function getVideoId() {
+    function getCurrentVideoUrl() {
         const url = window.location.href;
         const urlParams = new URLSearchParams(window.location.search);
-        const normalVideoId = urlParams.get('v');
+        const videoId = urlParams.get('v');
+        
+        if (videoId) {
+            return `https://www.youtube.com/watch?v=${videoId}`;
+        }
+        
         const shortsMatch = url.match(/\/shorts\/([^?]+)/);
-        return normalVideoId || (shortsMatch ? shortsMatch[1] : null);
+        if (shortsMatch) {
+            return `https://www.youtube.com/shorts/${shortsMatch[1]}`;
+        }
+        
+        return null;
     }
 
     function getChannelIdentifier() {
@@ -243,9 +252,9 @@
     }
 
     function redirectToStatsAPI() {
-        const videoId = getVideoId();
-        if (videoId) {
-            const apiUrl = `https://afkarxyzstats.vercel.app/?directVideo=${videoId}`;
+        const videoUrl = getCurrentVideoUrl();
+        if (videoUrl) {
+            const apiUrl = `https://afkarxyzstats.vercel.app/?directVideo=${encodeURIComponent(videoUrl)}`;
             window.open(apiUrl, '_blank');
         }
     }
@@ -494,7 +503,7 @@
                 });
                 insertIconForShorts();
             }
-        } else if (getVideoId()) {
+        } else if (getCurrentVideoUrl()) {
             insertIconForRegularVideo();
         }
     }

@@ -89,7 +89,7 @@ Reveal Video & Shorts Category.
 
 ## 6. Reveal Country Flag
 
-Reveal Country Flag
+Reveal Country Flag.
 
 ![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.app/greasyfork.org/en/scripts/515505)
 

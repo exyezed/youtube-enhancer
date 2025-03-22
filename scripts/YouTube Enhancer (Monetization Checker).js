@@ -2,14 +2,13 @@
 // @name         YouTube Enhancer (Monetization Checker)
 // @description  Check the Monetization Status.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
 // @license      MIT
 // @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
-// @connect      monetizationcheck.vercel.app
 // @connect      youtube.com
 // ==/UserScript==
 
@@ -17,26 +16,113 @@
   "use strict";
 
   let lastCheckedUrl = "";
+  let lastCheckedChannelId = null;
   let isCheckingMonetization = false;
+  let checkQueue = Promise.resolve();
+
+  function addGlobalStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.id = 'yt-monetization-global-styles';
+    styleElement.textContent = `
+      ytd-channel-name {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+      }
+      
+      ytd-channel-name #container {
+        display: flex !important;
+        align-items: center !important;
+      }
+      
+      ytd-channel-name ytd-badge-supported-renderer {
+        display: flex !important;
+        align-items: center !important;
+      }
+      
+      .yt-video-monetization-icon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-left: 4px !important;
+        height: 15px !important;
+        position: relative !important;
+        top: 0 !important;
+      }
+      
+      .yt-video-monetization-icon svg {
+        width: 15px !important;
+        height: 15px !important;
+        display: block !important;
+      }
+      
+      .yt-monetization-icon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-left: 8px !important;
+        height: 20px !important;
+        position: relative !important;
+      }
+      
+      .yt-monetization-icon svg {
+        width: 20px !important;
+        height: 20px !important;
+        display: block !important;
+      }
+      
+      .dynamic-text-view-model-wiz__h1 {
+        display: flex !important;
+        align-items: center !important;
+      }
+      
+      .dynamic-text-view-model-wiz__h1 .yt-core-attributed-string {
+        display: flex !important;
+        align-items: center !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+  }
+
+  addGlobalStyles();
 
   const commonIconStyles = {
     position: "relative",
-    display: "inline-flex",
+    display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     marginLeft: "8px",
     height: "20px",
     cursor: "pointer"
   };
+  
+  const videoIconStyles = {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: "4px",
+    height: "15px",
+    cursor: "pointer"
+  };
 
-  function createMonetizationIcon(isMonetized) {
+  function createMonetizationIcon(isMonetized, isVideo = false) {
     const container = document.createElement("div");
-    Object.assign(container.style, commonIconStyles);
+    Object.assign(container.style, isVideo ? videoIconStyles : commonIconStyles);
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 512 512");
     svg.setAttribute("fill", "none");
-    svg.setAttribute("width", "20");
-    svg.setAttribute("height", "20");
+    
+    if (isVideo) {
+      svg.setAttribute("width", "15");
+      svg.setAttribute("height", "15");
+    } else {
+      svg.setAttribute("width", "20");
+      svg.setAttribute("height", "20");
+    }
+    
+    svg.style.display = "block";
 
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute(
@@ -51,14 +137,22 @@
     return container;
   }
 
-  function createSpinnerIcon() {
+  function createSpinnerIcon(isVideo = false) {
     const container = document.createElement("div");
-    Object.assign(container.style, commonIconStyles);
+    Object.assign(container.style, isVideo ? videoIconStyles : commonIconStyles);
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 512 512");
-    svg.setAttribute("width", "20");
-    svg.setAttribute("height", "20");
+    
+    if (isVideo) {
+      svg.setAttribute("width", "15");
+      svg.setAttribute("height", "15");
+    } else {
+      svg.setAttribute("width", "20");
+      svg.setAttribute("height", "20");
+    }
+    
+    svg.style.display = "block";
     svg.style.animation = "yt-monetization-spinner-rotate 1.5s linear infinite";
 
     if (!document.querySelector("#yt-monetization-spinner-style")) {
@@ -101,17 +195,58 @@
     return container;
   }
 
+  function extractChannelIdFromVideoPage() {
+    const channelLinks = document.querySelectorAll('a.ytd-channel-name, ytd-video-owner-renderer a');
+    
+    for (const link of channelLinks) {
+      const href = link.getAttribute('href');
+      if (href) {
+        if (href.includes('/channel/')) {
+          return href.split('/channel/')[1].split('/')[0];
+        }
+        if (href.includes('/@')) {
+          return '@' + href.split('/@')[1].split('/')[0];
+        }
+      }
+    }
+    
+    const ownerRenderer = document.querySelector('ytd-video-owner-renderer');
+    if (ownerRenderer) {
+      const channelLink = ownerRenderer.querySelector('a');
+      if (channelLink) {
+        const href = channelLink.getAttribute('href');
+        if (href) {
+          if (href.includes('/channel/')) {
+            return href.split('/channel/')[1].split('/')[0];
+          }
+          if (href.includes('/@')) {
+            return '@' + href.split('/@')[1].split('/')[0];
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+
   function extractChannelIdentifier() {
     const url = window.location.href;
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
+    
+    if (pathname === '/watch') {
+      const channelId = extractChannelIdFromVideoPage();
+      if (channelId) {
+        return channelId;
+      }
+    }
     
     if (pathname.includes('/channel/')) {
       return pathname.split('/channel/')[1].split('/')[0];
     }
     
     if (pathname.includes('/@')) {
-      return pathname.split('/@')[1].split('/')[0];
+      return '@' + pathname.split('/@')[1].split('/')[0];
     }
     
     return null;
@@ -140,11 +275,164 @@
     return channelIdentifier !== null;
   }
 
-  async function checkMonetization() {
-    const currentUrl = window.location.href;
+  function extractVideoIdsFromHTML(html) {
+    const videoIds = [];
+    
+    const videoIdRegex = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+    let match;
+    
+    while ((match = videoIdRegex.exec(html)) !== null) {
+      const videoId = match[1];
+      if (!videoIds.includes(videoId)) {
+        videoIds.push(videoId);
+      }
+      
+      if (videoIds.length >= 3) break;
+    }
+    
+    return videoIds;
+  }
 
-    if (currentUrl !== lastCheckedUrl) {
+  function scrapeChannelVideos(channelIdentifier) {
+    return new Promise((resolve, reject) => {
+      const channelURL = channelIdentifier.startsWith('@') 
+        ? `https://www.youtube.com/${channelIdentifier}/videos`
+        : `https://www.youtube.com/channel/${channelIdentifier}/videos`;
+
+      GM_xmlhttpRequest({
+        method: "GET",
+        url: channelURL,
+        onload: function(response) {
+          if (response.status === 200) {
+            const videoIds = extractVideoIdsFromHTML(response.responseText);
+            if (videoIds.length > 0) {
+              resolve(videoIds);
+            } else {
+              const ytInitialDataMatch = response.responseText.match(/var ytInitialData = (.+?);<\/script>/s);
+              if (ytInitialDataMatch && ytInitialDataMatch[1]) {
+                const ytInitialData = JSON.parse(ytInitialDataMatch[1]);
+                const tabs = ytInitialData.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
+                let videosTab = null;
+                
+                for (const tab of tabs) {
+                  if (tab.tabRenderer && tab.tabRenderer.title === "Videos") {
+                    videosTab = tab;
+                    break;
+                  }
+                }
+                
+                if (!videosTab) {
+                  reject(new Error("Could not find videos tab"));
+                  return;
+                }
+                
+                const items = videosTab.tabRenderer?.content?.richGridRenderer?.contents || [];
+                const extractedVideoIds = [];
+                
+                for (const item of items) {
+                  if (item.richItemRenderer && item.richItemRenderer.content?.videoRenderer) {
+                    const videoRenderer = item.richItemRenderer.content.videoRenderer;
+                    
+                    if (videoRenderer.badges) {
+                      const isLiveOrUpcoming = videoRenderer.badges.some(badge => 
+                        badge.metadataBadgeRenderer && 
+                        (badge.metadataBadgeRenderer.label === "LIVE" || 
+                         badge.metadataBadgeRenderer.label === "UPCOMING" ||
+                         badge.metadataBadgeRenderer.label.includes("Premiere"))
+                      );
+                      
+                      if (isLiveOrUpcoming) continue;
+                    }
+                    
+                    if (videoRenderer.videoId) {
+                      extractedVideoIds.push(videoRenderer.videoId);
+                      
+                      if (extractedVideoIds.length >= 3) break;
+                    }
+                  }
+                }
+                
+                if (extractedVideoIds.length > 0) {
+                  resolve(extractedVideoIds);
+                } else {
+                  reject(new Error("No video IDs found"));
+                }
+              } else {
+                reject(new Error("No video IDs found"));
+              }
+            }
+          } else {
+            reject(new Error(`Failed to fetch channel page: ${response.status}`));
+          }
+        },
+        onerror: function(error) {
+          reject(error);
+        }
+      });
+    });
+  }
+
+  function getChannelVideosFromDOM() {
+    const videoIds = [];
+    
+    const videoElements = document.querySelectorAll('a#video-title-link, a#thumbnail[href*="/watch"]');
+    
+    for (const element of videoElements) {
+      const href = element.getAttribute('href');
+      if (href && href.includes('/watch?v=')) {
+        const videoId = new URL('https://www.youtube.com' + href).searchParams.get('v');
+        if (videoId && !videoIds.includes(videoId)) {
+          videoIds.push(videoId);
+          
+          if (videoIds.length >= 3) break;
+        }
+      }
+    }
+    
+    return videoIds.length > 0 ? videoIds : null;
+  }
+
+  function checkVideoForAds(videoId) {
+    return new Promise((resolve, reject) => {
+      GM_xmlhttpRequest({
+        method: "GET",
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+        onload: function(response) {
+          if (response.status === 200) {
+            const hasAds = response.responseText.includes("yt_ad");
+            resolve(hasAds);
+          } else {
+            reject(new Error(`Failed to fetch video: ${response.status}`));
+          }
+        },
+        onerror: function(error) {
+          reject(error);
+        }
+      });
+    });
+  }
+
+  function queueMonetizationCheck(forceCheck = false) {
+    if (isCheckingMonetization && !forceCheck) {
+      return;
+    }
+
+    checkQueue = checkQueue.then(() => {
+      return performMonetizationCheck(forceCheck);
+    }).catch(error => {
+      isCheckingMonetization = false;
+    });
+  }
+
+  async function performMonetizationCheck(forceCheck = false) {
+    const currentUrl = window.location.href;
+    const currentChannelId = extractChannelIdentifier();
+
+    if (currentUrl !== lastCheckedUrl || 
+        currentChannelId !== lastCheckedChannelId || 
+        forceCheck) {
       lastCheckedUrl = currentUrl;
+      lastCheckedChannelId = currentChannelId;
       isCheckingMonetization = false;
     }
 
@@ -154,102 +442,65 @@
 
     isCheckingMonetization = true;
 
-    if (isVideoPage()) {
-      await checkVideoMonetization();
-    } else if (isChannelPage()) {
-      await checkChannelMonetization();
-    }
-
-    isCheckingMonetization = false;
-  }
-  
-  async function checkVideoMonetization() {
-    const videoId = extractVideoId();
-    if (!videoId) {
-      return;
-    }
-    
-    await showVideoSpinner();
-    
     try {
-      const result = await new Promise((resolve, reject) => {
-        GM_xmlhttpRequest({
-          method: "GET",
-          url: `https://monetizationcheck.vercel.app/video/${encodeURIComponent(videoId)}`,
-          onload: function (response) {
-            if (response.status === 200) {
-              try {
-                const data = JSON.parse(response.responseText);
-                if (data.success && data.data) {
-                  resolve(data.data.monetization);
-                } else {
-                  reject(new Error(`Invalid response format: ${response.responseText}`));
-                }
-              } catch (error) {
-                reject(new Error(`Failed to parse response: ${error.message}`));
-              }
-            } else {
-              reject(new Error(`Failed to check monetization: ${response.status}`));
-            }
-          },
-          onerror: function (error) {
-            reject(error);
-          },
+      if (isVideoPage() || isChannelPage()) {
+        const channelId = extractChannelIdentifier();
+        
+        if (!channelId) {
+          throw new Error("Could not determine channel ID");
+        }
+        
+        if (isVideoPage()) {
+          await showVideoSpinner();
+        } else {
+          await showChannelSpinner();
+        }
+        
+        let videoIds = await scrapeChannelVideos(channelId);
+        
+        if (!videoIds || videoIds.length === 0) {
+          videoIds = getChannelVideosFromDOM();
+        }
+        
+        if ((!videoIds || videoIds.length === 0) && isVideoPage()) {
+          const currentVideoId = extractVideoId();
+          if (currentVideoId) {
+            videoIds = [currentVideoId];
+          }
+        }
+        
+        if (!videoIds || videoIds.length === 0) {
+          throw new Error("Could not find any videos to check");
+        }
+        
+        const checkPromises = videoIds.map(videoId => {
+          return checkVideoForAds(videoId).catch(() => false);
         });
-      });
-      
-      await updateVideoPage(result);
+        
+        const results = await Promise.all(checkPromises);
+        const isMonetized = results.some(result => result === true);
+        
+        if (isVideoPage()) {
+          await updateVideoPage(isMonetized);
+        } else {
+          await updateChannelPage(isMonetized);
+        }
+      }
     } catch (error) {
-      console.error('Error checking video monetization:', error);
-      await updateVideoPage(false);
-    }
-  }
-
-  async function checkChannelMonetization() {
-    const channelIdentifier = extractChannelIdentifier();
-    if (!channelIdentifier) {
-      return;
-    }
-
-    await showChannelSpinner();
-
-    try {
-      const result = await new Promise((resolve, reject) => {
-        GM_xmlhttpRequest({
-          method: "GET",
-          url: `https://monetizationcheck.vercel.app/channel/${encodeURIComponent(channelIdentifier)}`,
-          onload: function (response) {
-            if (response.status === 200) {
-              try {
-                const data = JSON.parse(response.responseText);
-                if (data.success && data.data) {
-                  resolve(data.data.monetization);
-                } else {
-                  reject(new Error(`Invalid response format: ${response.responseText}`));
-                }
-              } catch (error) {
-                reject(new Error(`Failed to parse response: ${error.message}`));
-              }
-            } else {
-              reject(new Error(`Failed to check monetization: ${response.status}`));
-            }
-          },
-          onerror: function (error) {
-            reject(error);
-          },
-        });
-      });
-
-      await updateChannelPage(result);
-    } catch (error) {
-      console.error('Error checking channel monetization:', error);
-      await updateChannelPage(false);
+      if (isVideoPage()) {
+        await updateVideoPage(false);
+      } else if (isChannelPage()) {
+        await updateChannelPage(false);
+      }
+    } finally {
+      isCheckingMonetization = false;
     }
   }
 
   function findChannelTitleElement(retryCount = 0, maxRetries = 5) {
     const possibleTitleSelectors = [
-      ".dynamic-text-view-model-wiz__h1 .yt-core-attributed-string",
+      "h1.dynamic-text-view-model-wiz__h1 .yt-core-attributed-string",
+      "h1 .yt-core-attributed-string",
       "ytd-channel-name #channel-name",
       "#channel-header-container #channel-name",
     ];
@@ -297,14 +548,13 @@
       existingIcon.remove();
     }
 
-    const spinner = createSpinnerIcon();
+    const spinner = createSpinnerIcon(false);
     spinner.classList.add("yt-monetization-icon");
 
-    const verifiedBadge = titleElement.querySelector(
-      ".yt-core-attributed-string__image-element"
-    );
-    if (verifiedBadge) {
-      verifiedBadge.parentNode.insertBefore(spinner, verifiedBadge.nextSibling);
+    const channelNameContainer = titleElement.closest('h1') || titleElement.parentNode;
+    
+    if (channelNameContainer) {
+      channelNameContainer.appendChild(spinner);
     } else {
       titleElement.appendChild(spinner);
     }
@@ -323,13 +573,13 @@
       existingIcon.remove();
     }
     
-    const spinner = createSpinnerIcon();
+    const spinner = createSpinnerIcon(true);
     spinner.classList.add("yt-video-monetization-icon");
     
-    const verifiedBadge = channelElement.querySelector(".badge-style-type-verified");
+    const badgeContainer = channelElement.querySelector("ytd-badge-supported-renderer");
     
-    if (verifiedBadge) {
-      verifiedBadge.parentNode.insertBefore(spinner, verifiedBadge.nextSibling);
+    if (badgeContainer) {
+      badgeContainer.parentNode.insertBefore(spinner, badgeContainer.nextSibling);
     } else {
       channelElement.appendChild(spinner);
     }
@@ -348,18 +598,14 @@
       existingIcon.remove();
     }
 
-    const monetizationIcon = createMonetizationIcon(isMonetized);
+    const monetizationIcon = createMonetizationIcon(isMonetized, false);
     monetizationIcon.classList.add("yt-monetization-icon");
     monetizationIcon.title = isMonetized ? "Channel is monetized" : "Channel is not monetized";
 
-    const verifiedBadge = titleElement.querySelector(
-      ".yt-core-attributed-string__image-element"
-    );
-    if (verifiedBadge) {
-      verifiedBadge.parentNode.insertBefore(
-        monetizationIcon,
-        verifiedBadge.nextSibling
-      );
+    const channelNameContainer = titleElement.closest('h1') || titleElement.parentNode;
+    
+    if (channelNameContainer) {
+      channelNameContainer.appendChild(monetizationIcon);
     } else {
       titleElement.appendChild(monetizationIcon);
     }
@@ -376,14 +622,14 @@
       existingIcon.remove();
     }
     
-    const monetizationIcon = createMonetizationIcon(isMonetized);
+    const monetizationIcon = createMonetizationIcon(isMonetized, true);
     monetizationIcon.classList.add("yt-video-monetization-icon");
-    monetizationIcon.title = isMonetized ? "Video is monetized" : "Video is not monetized";
+    monetizationIcon.title = isMonetized ? "Channel is monetized" : "Channel is not monetized";
     
-    const verifiedBadge = channelElement.querySelector(".badge-style-type-verified");
+    const badgeContainer = channelElement.querySelector("ytd-badge-supported-renderer");
     
-    if (verifiedBadge) {
-      verifiedBadge.parentNode.insertBefore(monetizationIcon, verifiedBadge.nextSibling);
+    if (badgeContainer) {
+      badgeContainer.parentNode.insertBefore(monetizationIcon, badgeContainer.nextSibling);
     } else {
       channelElement.appendChild(monetizationIcon);
     }
@@ -392,12 +638,48 @@
   function setupImprovedUrlChangeDetection() {
     let lastPath = window.location.pathname;
     let lastSearch = window.location.search;
+    let lastVideoId = extractVideoId();
+    let lastChannelId = extractChannelIdentifier();
+    let lastHref = window.location.href;
+
+    function checkForChanges() {
+      const currentPath = window.location.pathname;
+      const currentSearch = window.location.search;
+      const currentVideoId = extractVideoId();
+      const currentChannelId = extractChannelIdentifier();
+      const currentHref = window.location.href;
+      
+      if (currentPath !== lastPath || 
+          currentSearch !== lastSearch || 
+          currentVideoId !== lastVideoId ||
+          currentChannelId !== lastChannelId ||
+          currentHref !== lastHref) {
+        
+        lastPath = currentPath;
+        lastSearch = currentSearch;
+        lastVideoId = currentVideoId;
+        lastChannelId = currentChannelId;
+        lastHref = currentHref;
+        
+        setTimeout(() => queueMonetizationCheck(true), 500);
+      }
+    }
 
     const observer = new MutationObserver((mutations) => {
-      if (window.location.pathname !== lastPath || window.location.search !== lastSearch) {
-        lastPath = window.location.pathname;
-        lastSearch = window.location.search;
-        setTimeout(() => checkMonetization(), 500);
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (node.id === 'content' || 
+                  node.id === 'page-manager' || 
+                  node.tagName === 'YTD-WATCH-FLEXY' ||
+                  node.tagName === 'YTD-BROWSE') {
+                checkForChanges();
+                break;
+              }
+            }
+          }
+        }
       }
     });
 
@@ -411,40 +693,35 @@
 
     history.pushState = function () {
       originalPushState.apply(this, arguments);
-      setTimeout(() => {
-        if (window.location.pathname !== lastPath || window.location.search !== lastSearch) {
-          lastPath = window.location.pathname;
-          lastSearch = window.location.search;
-          checkMonetization();
-        }
-      }, 500);
+      setTimeout(checkForChanges, 100);
     };
 
     history.replaceState = function () {
       originalReplaceState.apply(this, arguments);
-      setTimeout(() => {
-        if (window.location.pathname !== lastPath || window.location.search !== lastSearch) {
-          lastPath = window.location.pathname;
-          lastSearch = window.location.search;
-          checkMonetization();
-        }
-      }, 500);
+      setTimeout(checkForChanges, 100);
     };
 
     window.addEventListener("popstate", () => {
-      setTimeout(() => {
-        if (window.location.pathname !== lastPath || window.location.search !== lastSearch) {
-          lastPath = window.location.pathname;
-          lastSearch = window.location.search;
-          checkMonetization();
-        }
-      }, 500);
+      setTimeout(checkForChanges, 100);
     });
+    
+    setInterval(checkForChanges, 1000);
+    
+    document.addEventListener('click', (event) => {
+      let target = event.target;
+      while (target && target !== document) {
+        if (target.tagName === 'A' || 
+            target.id === 'thumbnail' || 
+            target.classList.contains('yt-simple-endpoint')) {
+          setTimeout(checkForChanges, 500);
+          break;
+        }
+        target = target.parentNode;
+      }
+    }, true);
   }
 
-  checkMonetization();
-
+  queueMonetizationCheck(true);
   setupImprovedUrlChangeDetection();
-
-  window.checkYoutubeMonetization = checkMonetization;
+  window.checkYoutubeMonetization = () => queueMonetizationCheck(true);
 })();

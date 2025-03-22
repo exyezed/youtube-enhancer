@@ -1,7 +1,7 @@
 ![Untitled-0](https://github.com/user-attachments/assets/1db0a45e-1c0c-4298-bce9-f119d121e7af)
 
 > [!IMPORTANT]
-> To use this script, you must have **Tampermonkey** installed.
+> To use these scripts, you must have **Tampermonkey** installed.
 
 > [!TIP]
 > For more convenience, install **AdGuard Desktop**. It integrates with all browsers without separate installations.

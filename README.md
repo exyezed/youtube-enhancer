@@ -166,8 +166,3 @@ Check the Monetization Status.
 > Video
 
 ![image](https://github.com/user-attachments/assets/69a50a78-c51c-4b7e-a981-a36d8410e0dc)
-
-## Contributors
-<a href="https://github.com/exyezed/youtube-enhancer/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=exyezed/youtube-enhancer" />
-</a>

@@ -159,11 +159,13 @@ Check the Monetization Status.
 
 ![Installs](https://img.shields.io/badge/dynamic/json?color=%232ea44f&label=Installs&query=$&url=https://forksinstalls.vercel.app/greasyfork.org/en/scripts/527269)
 
-![image](https://github.com/user-attachments/assets/deffa609-3423-4975-87ed-37b37f27fabb)
+> Channel
 
-![image](https://github.com/user-attachments/assets/0645f5ae-4a7f-4737-9b41-77be43bd0386)
+![image](https://github.com/user-attachments/assets/73f276c3-0c5c-469a-9c87-74087fa535ee)
 
-![image](https://github.com/user-attachments/assets/e7a9b1f0-71eb-44d6-a29f-04498622be1a)
+> Video
+
+![image](https://github.com/user-attachments/assets/69a50a78-c51c-4b7e-a981-a36d8410e0dc)
 
 ## Contributors
 <a href="https://github.com/exyezed/youtube-enhancer/graphs/contributors">

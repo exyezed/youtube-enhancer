@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Channel ID)
 // @description  Reveal Channel ID.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.4
+// @version      1.5
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -21,6 +21,7 @@
     let isRequestInProgress = false;
     const channelCache = {};
     let processingLock = false;
+    let currentUrl = window.location.href;
     
     function throttle(func, limit) {
         let lastCall = 0;
@@ -36,9 +37,7 @@
     function loadCache() {
         try {
             const savedCache = GM_getValue('ytEnhancerChannelCache', null);
-            if (savedCache) {
-                Object.assign(channelCache, JSON.parse(savedCache));
-            }
+            if (savedCache) Object.assign(channelCache, JSON.parse(savedCache));
         } catch (e) {
             console.error('Error loading cache:', e);
         }
@@ -52,15 +51,17 @@
         }
     }
 
+    function isChannelPage() {
+        const path = window.location.pathname;
+        return path.startsWith('/channel/') || path.startsWith('/@');
+    }
+
     async function fetchChannelData(url) {
         if (isRequestInProgress) return null;
         isRequestInProgress = true;
         
         try {
-            const response = await fetch(url, {
-                credentials: 'same-origin'
-            });
-            
+            const response = await fetch(url, {credentials: 'same-origin'});
             if (!response.ok) {
                 isRequestInProgress = false;
                 return null;
@@ -80,9 +81,7 @@
         const urlMatch = url.match(/@([^/]+)/);
         const channelHandle = urlMatch ? urlMatch[1] : null;
         
-        if (channelHandle && channelCache[channelHandle]) {
-            return channelCache[channelHandle];
-        }
+        if (channelHandle && channelCache[channelHandle]) return channelCache[channelHandle];
         
         const data = await fetchChannelData(url);
         if (!data) return null;
@@ -91,7 +90,7 @@
             const channelName = data?.metadata?.channelMetadataRenderer?.title || null;
             const channelId = data?.metadata?.channelMetadataRenderer?.externalId || null;
             
-            const channelInfo = { channelName, channelId };
+            const channelInfo = {channelName, channelId};
             
             if (channelHandle && channelId) {
                 channelCache[channelHandle] = channelInfo;
@@ -123,9 +122,7 @@
     function waitForElement(timeout = 5000) {
         return new Promise((resolve, reject) => {
             const element = getChannelNameElement();
-            if (element) {
-                return resolve(element);
-            }
+            if (element) return resolve(element);
 
             const observer = new MutationObserver((_mutations, obs) => {
                 const element = getChannelNameElement();
@@ -159,9 +156,7 @@
     }
 
     async function addChannelId() {
-        if (processingLock) {
-            return;
-        }
+        if (!isChannelPage() || processingLock) return;
         
         processingLock = true;
         
@@ -176,12 +171,7 @@
 
             const channelName = channelNameElement.textContent.trim().replace('@', '');
             
-            if (channelName.length === 0) {
-                processingLock = false;
-                return;
-            }
-
-            if (channelName === lastProcessedChannelName || isRequestInProgress) {
+            if (channelName.length === 0 || channelName === lastProcessedChannelName || isRequestInProgress) {
                 processingLock = false;
                 return;
             }
@@ -189,6 +179,14 @@
             lastProcessedChannelName = channelName;
             
             const urlPath = window.location.pathname;
+            
+            if (urlPath.startsWith('/channel/')) {
+                const channelId = urlPath.split('/channel/')[1].split('/')[0];
+                appendChannelIdToElement(channelNameElement, channelId);
+                processingLock = false;
+                return;
+            }
+            
             const handleMatch = urlPath.match(/@([^/]+)/);
             const channelHandle = handleMatch ? handleMatch[1] : null;
             
@@ -204,9 +202,7 @@
             const channelInfo = await getChannelInfo(window.location.href);
             
             const loadingIndicator = channelNameElement.querySelector('.revealChannelIDLoading');
-            if (loadingIndicator) {
-                loadingIndicator.remove();
-            }
+            if (loadingIndicator) loadingIndicator.remove();
             
             if (channelInfo && channelInfo.channelId) {
                 appendChannelIdToElement(channelNameElement, channelInfo.channelId);
@@ -215,9 +211,7 @@
             const channelNameElement = getChannelNameElement();
             if (channelNameElement) {
                 const loadingIndicator = channelNameElement.querySelector('.revealChannelIDLoading');
-                if (loadingIndicator) {
-                    loadingIndicator.remove();
-                }
+                if (loadingIndicator) loadingIndicator.remove();
             }
         }
         
@@ -230,10 +224,7 @@
             channelIdLink.className = 'revealChannelID';
             channelIdLink.textContent = ` (${channelId})`;
             channelIdLink.href = `https://www.youtube.com/channel/${channelId}`;
-            channelIdLink.style.fontSize = '1em';
-            channelIdLink.style.color = '#3ea6ff';
-            channelIdLink.style.textDecoration = 'none';
-            channelIdLink.style.cursor = 'pointer';
+            channelIdLink.style.cssText = 'font-size:1em;color:#3ea6ff;text-decoration:none;cursor:pointer;';
             
             channelIdLink.addEventListener('mouseover', function() {
                 this.style.textDecoration = 'none';
@@ -243,51 +234,85 @@
         }
     }
 
-    const handleNavigation = throttle(function() {
-        lastProcessedChannelName = '';
-        addChannelId();
-    }, 500);
-
-    const handleDomMutation = throttle(function() {
-        addChannelId();
-    }, 300);
-
-    const observer = new MutationObserver((mutations) => {
-        let shouldProcess = false;
-        
-        for (const mutation of mutations) {
-            if (mutation.target.nodeName === 'YTD-APP') {
-                shouldProcess = true;
-                break;
+    function checkForUrlChange() {
+        const newUrl = window.location.href;
+        if (newUrl !== currentUrl) {
+            currentUrl = newUrl;
+            if (isChannelPage()) {
+                lastProcessedChannelName = '';
+                setTimeout(addChannelId, 500);
             }
         }
-        
-        if (shouldProcess) {
-            handleNavigation();
-        } else {
-            handleDomMutation();
+    }
+
+    const handleNavigation = throttle(function() {
+        if (isChannelPage()) {
+            lastProcessedChannelName = '';
+            addChannelId();
         }
-    });
+    }, 300);
 
-    const urlObserver = new MutationObserver(() => {
-        handleNavigation();
-    });
-    
-    loadCache();
+    const handleDomMutation = throttle(function() {
+        if (isChannelPage()) addChannelId();
+    }, 300);
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        characterData: false,
-        attributes: false
-    });
+    function init() {
+        loadCache();
+        
+        const observer = new MutationObserver((mutations) => {
+            if (!isChannelPage()) return;
+            
+            for (const mutation of mutations) {
+                if (mutation.target.nodeName === 'YTD-APP' || 
+                    mutation.target.id === 'content' || 
+                    mutation.target.id === 'page-manager') {
+                    handleNavigation();
+                    return;
+                }
+            }
+            handleDomMutation();
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: false,
+            attributes: false
+        });
+        
+        
+        document.addEventListener('yt-navigate-start', () => {
+            if (isChannelPage()) lastProcessedChannelName = '';
+        });
 
-    urlObserver.observe(document.querySelector('title'), {
-        childList: true
-    });
+        document.addEventListener('yt-navigate-finish', () => {
+            if (isChannelPage()) {
+                lastProcessedChannelName = '';
+                handleNavigation();
+            }
+        });
+        
+        document.addEventListener('yt-page-data-updated', () => {
+            if (isChannelPage()) {
+                lastProcessedChannelName = '';
+                handleNavigation();
+            }
+        });
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isChannelPage()) handleNavigation();
+        });
+        
+        window.addEventListener('focus', () => {
+            if (isChannelPage()) handleNavigation();
+        });
+        
+        if (isChannelPage()) handleNavigation();
+    }
 
-    handleNavigation();
-
-    document.addEventListener('yt-navigate-start', handleNavigation);
-    document.addEventListener('yt-navigate-finish', handleNavigation);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();

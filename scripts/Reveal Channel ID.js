@@ -234,16 +234,6 @@
         }
     }
 
-    function checkForUrlChange() {
-        const newUrl = window.location.href;
-        if (newUrl !== currentUrl) {
-            currentUrl = newUrl;
-            if (isChannelPage()) {
-                lastProcessedChannelName = '';
-                setTimeout(addChannelId, 500);
-            }
-        }
-    }
 
     const handleNavigation = throttle(function() {
         if (isChannelPage()) {

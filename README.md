@@ -8,13 +8,13 @@
 
 ### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed)
 
-![Total Installs](https://forkstats.greasyfork.workers.dev/badge/total/greasyfork.org/en/users/1382928)
+![Total Installs](https://forkstats.greasyfork.workers.dev/total/greasyfork.org/en/users/1382928)
 
 ## 1. Reveal Channel ID
 
 Reveal Channel ID.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/513116)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/513116)
 
 ![image](https://github.com/user-attachments/assets/7142abed-f2b4-46b8-a262-4db2132f6672)
 
@@ -22,7 +22,7 @@ Reveal Channel ID.
 
 View Original Avatar, Banner, Video and Shorts Thumbnails.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/513113)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/513113)
 
 > Avatar
 
@@ -48,7 +48,7 @@ View Original Avatar, Banner, Video and Shorts Thumbnails.
 
 Add Loop, Save and Copy Screenshot Buttons.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/513114)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/513114)
 
 > Video Player
 
@@ -62,7 +62,7 @@ Add Loop, Save and Copy Screenshot Buttons.
 
 Reveal Views & Upload Time.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/513133)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/513133)
 
 > Compact Mode
 
@@ -80,7 +80,7 @@ Reveal Views & Upload Time.
 
 Reveal Video & Shorts Category.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/513134)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/513134)
 
 > Video
 
@@ -94,7 +94,7 @@ Reveal Video & Shorts Category.
 
 Reveal Country Flag.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/515505)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/515505)
 
 > Channel
 
@@ -112,7 +112,7 @@ Reveal Country Flag.
 
 Add a Stats Button.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/513154)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/513154)
 
 > Channel
 
@@ -134,7 +134,7 @@ Add a Stats Button.
 
 Display Real-Time Subscriber Count.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/516477)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/516477)
 
 > [!WARNING]
 > Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
@@ -149,7 +149,7 @@ Display Real-Time Subscriber Count.
 
 Download Subtitles in Various Languages.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/516645)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/516645)
 
 > [!WARNING]
 > Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
@@ -160,7 +160,7 @@ Download Subtitles in Various Languages.
 
 Check the Monetization Status.
 
-![Installs](https://forkstats.greasyfork.workers.dev/badge/custom/Installs/greasyfork.org/en/scripts/527269)
+![Installs](https://forkstats.greasyfork.workers.dev/installs/greasyfork.org/en/scripts/527269)
 
 > Channel
 

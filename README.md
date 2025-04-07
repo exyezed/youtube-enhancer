@@ -6,7 +6,7 @@
 > [!TIP]
 > For more convenience, install **AdGuard Desktop**. It integrates with all browsers without separate installations.
 
-### [Greasy Fork](https://greasyfork.org/en/users/1382928-exyezed)
+### [Greasy Fork](https://greasyfork.org/en/users/1382928)
 
 ![Total Installs](https://forkstats.afkarxyz.workers.dev/total/greasyfork.org/en/users/1382928)
 

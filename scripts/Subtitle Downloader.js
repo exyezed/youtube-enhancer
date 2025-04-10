@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Subtitle Downloader)
 // @description  Download Subtitles in Various Languages.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -11,13 +11,167 @@
 // @match        https://youtube.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_download
-// @connect      downsub.vercel.app
+// @require      https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js
+// @connect      get-info.downsub.com
 // @connect      download.subtitle.to
 // @run-at       document-idle
 // ==/UserScript==
 
 (function() {
     'use strict';
+    
+    const SECRET_KEY = "zthxw34cdp6wfyxmpad38v52t3hsz6c5";
+    const API = "https://get-info.downsub.com/";
+    
+    const CryptoJS = window.CryptoJS;
+    const GM_download = window.GM_download;
+    const GM_xmlhttpRequest = window.GM_xmlhttpRequest;
+
+    const formatJson = {
+        stringify: function (crp) {
+            let result = {
+                ct: crp.ciphertext.toString(CryptoJS.enc.Base64)
+            };
+            if (crp.iv) {
+                result.iv = crp.iv.toString();
+            }
+            if (crp.salt) {
+                result.s = crp.salt.toString();
+            }
+            return JSON.stringify(result);
+        },
+        parse: function (output) {
+            let parse = JSON.parse(output);
+            let result = CryptoJS.lib.CipherParams.create({
+                ciphertext: CryptoJS.enc.Base64.parse(parse.ct)
+            });
+            if (parse.iv) {
+                result.iv = CryptoJS.enc.Hex.parse(parse.iv);
+            }
+            if (parse.s) {
+                result.salt = CryptoJS.enc.Hex.parse(parse.s);
+            }
+            return result;
+        }
+    };
+    
+    function _toBase64(payload) {
+        let vBtoa = btoa(payload);
+        vBtoa = vBtoa.replace("+", "-");
+        vBtoa = vBtoa.replace("/", "_");
+        vBtoa = vBtoa.replace("=", "");
+        return vBtoa;
+    }
+    
+    function _toBinary(base64) {
+        let data = base64.replace("-", "+");
+        data = data.replace("_", "/");
+        const mod4 = data.length % 4;
+        if (mod4) {
+            data += "====".substring(mod4);
+        }
+        return atob(data);
+    }
+    
+    function _encode(payload, options) {
+        if (!payload) {
+            return false;
+        }
+    
+        let result = CryptoJS.AES.encrypt(JSON.stringify(payload), options || SECRET_KEY, {
+            format: formatJson
+        }).toString();
+        return _toBase64(result).trim();
+    }
+    
+    function _decode(payload, options) {
+        if (!payload) {
+            return false;
+        }
+    
+        let result = CryptoJS.AES.decrypt(_toBinary(payload), options || SECRET_KEY, {
+            format: formatJson
+        }).toString(CryptoJS.enc.Utf8);
+        return result.trim();
+    }
+    
+    function _generateData(videoId) {
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        let id = videoId;
+        
+        return {
+            state: 99,
+            url: url,
+            urlEncrypt: _encode(url),
+            source: 0,
+            id: _encode(id),
+            playlistId: null
+        };
+    }
+    
+    function _decodeArray(result) {
+        let subtitles = [], subtitlesAutoTrans = [];
+    
+        if (result?.subtitles && result?.subtitles.length) {
+            result.subtitles.forEach((v, i) => {
+                let ff = {...v};
+                ff.url = _decode(ff.url).replace(/^"|"$/gi, "");
+                ff.enc_url = result.subtitles[i].url;
+                ff.download = {};
+                const params = new URLSearchParams({
+                    title: encodeURIComponent(ff.name),
+                    url: ff.enc_url
+                });
+                ff.download.srt = result.urlSubtitle + "?" + params.toString();
+                
+                const params2 = new URLSearchParams({
+                    title: encodeURIComponent(ff.name),
+                    url: ff.enc_url,
+                    type: "txt"
+                });
+                ff.download.txt = result.urlSubtitle + "?" + params2.toString();
+                
+                const params3 = new URLSearchParams({
+                    title: encodeURIComponent(ff.name),
+                    url: ff.enc_url,
+                    type: "raw"
+                });
+                ff.download.raw = result.urlSubtitle + "?" + params3.toString();
+                subtitles.push(ff);
+            });
+        }
+        
+        if (result?.subtitlesAutoTrans && result?.subtitlesAutoTrans.length) {
+            result.subtitlesAutoTrans.forEach((v, i) => {
+                let ff = {...v};
+                ff.url = _decode(ff.url).replace(/^"|"$/gi, "");
+                ff.enc_url = result.subtitlesAutoTrans[i].url;
+                ff.download = {};
+                const params = new URLSearchParams({
+                    title: encodeURIComponent(ff.name),
+                    url: ff.enc_url
+                });
+                ff.download.srt = result.urlSubtitle + "?" + params.toString();
+                
+                const params2 = new URLSearchParams({
+                    title: encodeURIComponent(ff.name),
+                    url: ff.enc_url,
+                    type: "txt"
+                });
+                ff.download.txt = result.urlSubtitle + "?" + params2.toString();
+                
+                const params3 = new URLSearchParams({
+                    title: encodeURIComponent(ff.name),
+                    url: ff.enc_url,
+                    type: "raw"
+                });
+                ff.download.raw = result.urlSubtitle + "?" + params3.toString();
+                subtitlesAutoTrans.push(ff);
+            });
+        }
+    
+        return Object.assign(result, {subtitles}, {subtitlesAutoTrans});
+    }
 
     function createSVGIcon(className, isHover = false) {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -67,13 +221,6 @@
         return urlParams.get('v');
     }
 
-    function createTableElement(tag, text = null) {
-        const element = document.createElement(tag);
-        if (text !== null) {
-            element.textContent = text;
-        }
-        return element;
-    }
 
     function downloadSubtitle(url, filename, format, buttonElement) {
         try {
@@ -443,13 +590,29 @@
         backdrop.appendChild(loader);
 
         try {
+            const data = _generateData(videoId);
+            
+            const headersList = {
+                "authority": "get-info.downsub.com",
+                "accept": "application/json, text/plain, */*",
+                "accept-language": "id-ID,id;q=0.9",
+                "origin": "https://downsub.com",
+                "priority": "u=1, i",
+                "referer": "https://downsub.com/",
+                "sec-ch-ua": '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": '"Windows"',
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-site",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+            };
+            
             const response = await new Promise((resolve, reject) => {
                 GM_xmlhttpRequest({
                     method: 'GET',
-                    url: `https://downsub.vercel.app/${videoId}`,
-                    headers: {
-                        'Accept': 'application/json'
-                    },
+                    url: API + data.id,
+                    headers: headersList,
                     responseType: 'json',
                     onload: function(response) {
                         if (response.status >= 200 && response.status < 300) {
@@ -458,19 +621,21 @@
                             reject(new Error(`Request failed with status ${response.status}`));
                         }
                     },
-                    onerror: function(error) {
+                    onerror: function() {
                         reject(new Error('Network error'));
                     }
                 });
             });
+
+            const processedResponse = _decodeArray(response);
 
             const videoTitleElement = document.querySelector('yt-formatted-string.style-scope.ytd-watch-metadata');
             const videoTitle = videoTitleElement ? videoTitleElement.textContent.trim() : `youtube_video_${videoId}`;
 
             loader.remove();
 
-            if (!response.subtitles || response.subtitles.length === 0 &&
-                (!response.subtitlesAutoTrans || response.subtitlesAutoTrans.length === 0)) {
+            if (!processedResponse.subtitles || processedResponse.subtitles.length === 0 &&
+                (!processedResponse.subtitlesAutoTrans || processedResponse.subtitlesAutoTrans.length === 0)) {
                 while (backdrop.firstChild) {
                     backdrop.removeChild(backdrop.firstChild);
                 }
@@ -486,8 +651,8 @@
             }
 
             const subtitleTable = createSubtitleTable(
-                response.subtitles || [],
-                response.subtitlesAutoTrans || [],
+                processedResponse.subtitles || [],
+                processedResponse.subtitlesAutoTrans || [],
                 videoTitle
             );
             backdrop.appendChild(subtitleTable);

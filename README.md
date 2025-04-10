@@ -151,9 +151,6 @@ Download Subtitles in Various Languages.
 
 ![Installs](https://forkstats.afkarxyz.workers.dev/installs/greasyfork.org/en/scripts/516645)
 
-> [!WARNING]
-> Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
-
 ![image](https://github.com/user-attachments/assets/97d401a4-f0b2-48cf-a22b-acfe8203a0a3)
 
 ## 10. Monetization Checker

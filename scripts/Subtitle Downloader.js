@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Subtitle Downloader)
 // @description  Download Subtitles in Various Languages.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -702,6 +702,13 @@
                 align-items: center;
                 justify-content: center;
                 position: relative;
+            }
+            @-moz-document url-prefix() {
+                .custom-subtitle-btn {
+                    top: 0;
+                    margin-bottom: 0;
+                    vertical-align: top;
+                }
             }
             .custom-subtitle-btn svg {
                 width: 24px;

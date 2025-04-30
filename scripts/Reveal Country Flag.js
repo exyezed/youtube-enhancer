@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Reveal Country Flag.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.6
+// @version      1.7
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -13,7 +13,7 @@
 // @grant        GM_getValue
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     const FLAG_CONFIG = {
@@ -44,74 +44,58 @@
     function getFromCache(type, id) {
         const cacheKey = getCacheKey(type, id);
         const cachedData = GM_getValue(cacheKey);
-        
         if (!cachedData) return null;
-
         const { value, timestamp } = JSON.parse(cachedData);
-        const now = Date.now();
-
-        if (now - timestamp > CACHE_CONFIG.EXPIRATION) {
+        if (Date.now() - timestamp > CACHE_CONFIG.EXPIRATION) {
             GM_setValue(cacheKey, null);
             return null;
         }
-
         return value;
     }
 
     function setToCache(type, id, value) {
         const cacheKey = getCacheKey(type, id);
-        const cacheData = {
-            value: value,
-            timestamp: Date.now()
-        };
-        GM_setValue(cacheKey, JSON.stringify(cacheData));
+        GM_setValue(cacheKey, JSON.stringify({ value, timestamp: Date.now() }));
     }
 
     async function getCountryData(type, id) {
         const cachedValue = getFromCache(type, id);
-        if (cachedValue) {
-            return cachedValue;
-        }
+        if (cachedValue) return cachedValue;
 
         const url = `https://flagscountry.vercel.app/api/${type}/${id}`;
-
-        if (typeof GM_xmlhttpRequest !== 'undefined') {
-            return new Promise((resolve) => {
-                GM_xmlhttpRequest({
-                    method: 'GET',
-                    url: url,
-                    onload: function(response) {
-                        if (response.status >= 200 && response.status < 300) {
-                            try {
-                                const data = JSON.parse(response.responseText);
-                                const countryData = {
-                                    code: data.country.toLowerCase(),
-                                    name: data.countryName
-                                };
-                                setToCache(type, id, countryData);
-                                resolve(countryData);
-                            } catch (error) {
-                                console.error('Error parsing JSON:', error);
-                                resolve(null);
-                            }
-                        } else {
-                            console.error('Request failed:', response.status);
+        return new Promise((resolve) => {
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: url,
+                onload: function (response) {
+                    if (response.status >= 200 && response.status < 300) {
+                        try {
+                            const data = JSON.parse(response.responseText);
+                            const countryData = {
+                                code: data.country.toLowerCase(),
+                                name: data.countryName
+                            };
+                            setToCache(type, id, countryData);
+                            resolve(countryData);
+                        } catch (error) {
+                            console.error('Error parsing JSON:', error);
                             resolve(null);
                         }
-                    },
-                    onerror: function(error) {
-                        console.error('Request error:', error);
-                        resolve(null);
-                    },
-                    ontimeout: function() {
-                        console.error('Request timed out');
+                    } else {
+                        console.error('Request failed:', response.status);
                         resolve(null);
                     }
-                });
+                },
+                onerror: function (error) {
+                    console.error('Request error:', error);
+                    resolve(null);
+                },
+                ontimeout: function () {
+                    console.error('Request timed out');
+                    resolve(null);
+                }
             });
-        } else {
-            return null;
-        }
+        });
     }
 
     function createFlag(size, margin, className, countryData) {
@@ -124,7 +108,6 @@
         flag.style.verticalAlign = 'middle';
         flag.style.cursor = 'pointer';
         flag.title = countryData.name;
-        
         return flag;
     }
 
@@ -142,7 +125,6 @@
             const channelId = channelUrl.includes('@')
                 ? channelUrl.split('@')[1].split('/')[0]
                 : channelUrl.split('/')[2];
-
             const countryData = await getCountryData('channel', channelId);
             if (countryData) {
                 channelElement.appendChild(
@@ -172,7 +154,7 @@
         }
 
         const shortsChannelElements = document.querySelectorAll('.ytReelChannelBarViewModelChannelName');
-        shortsChannelElements.forEach(async element => {
+        for (const element of shortsChannelElements) {
             if (!processedElements.has(element)) {
                 removeExistingFlags(element);
                 processedElements.add(element);
@@ -184,19 +166,30 @@
                     );
                 }
             }
-        });
+        }
     }
 
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    const debouncedAddFlag = debounce(addFlag, 500);
+
     const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length || mutation.type === 'childList' || mutation.type === 'subtree') {
-                addFlag();
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length || mutation.type === 'childList') {
+                debouncedAddFlag();
+                break;
             }
-        });
+        }
     });
 
     function startObserver() {
-        observer.observe(document.body, {
+        observer.observe(document.querySelector('ytd-browse, ytd-watch-flexy, #content'), {
             childList: true,
             subtree: true
         });

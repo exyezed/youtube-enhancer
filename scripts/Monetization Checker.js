@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Monetization Checker)
 // @description  Check the Monetization Status.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.3
+// @version      1.4
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -399,6 +399,20 @@
         url: `https://www.youtube.com/watch?v=${videoId}`,
         onload: function(response) {
           if (response.status === 200) {
+            const hasConfirmDialog = response.responseText.includes("confirmDialogEndpoint");
+            
+            const hasMonetizationURL = response.responseText.includes("https://lh3.googleusercontent.com/U3yX7Zs53bdY6Talo8egW_Jnc80oCeWTXOtKN6JVRjKnY14xs8tnc5Zvvew5JTUjl9EGNNR_kw9pJCoJ");
+            
+            if (hasConfirmDialog && hasMonetizationURL) {
+              resolve(true);
+              return;
+            }
+            
+            if (hasConfirmDialog && !hasMonetizationURL) {
+              resolve(false);
+              return;
+            }
+            
             const hasAds = response.responseText.includes("yt_ad");
             resolve(hasAds);
           } else {

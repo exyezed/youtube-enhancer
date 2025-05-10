@@ -2,14 +2,14 @@
 // @name         YouTube Enhancer (Monetization Checker)
 // @description  Check the Monetization Status.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.4
+// @version      1.5
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
 // @license      MIT
 // @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
-// @connect      youtube.com
+// @connect      monetizationcheck.vercel.app
 // ==/UserScript==
 
 (function () {
@@ -19,6 +19,8 @@
   let lastCheckedChannelId = null;
   let isCheckingMonetization = false;
   let checkQueue = Promise.resolve();
+  const API_BASE_URL = "https://monetizationcheck.vercel.app";
+  let statusCache = {}; 
 
   function addGlobalStyles() {
     const styleElement = document.createElement('style');
@@ -262,165 +264,63 @@
       return searchParams.get('v');
     }
     
+    if (pathname.startsWith('/shorts/')) {
+      return pathname.split('/shorts/')[1].split('/')[0];
+    }
+    
     return null;
   }
   
   function isVideoPage() {
     const url = window.location.href;
-    return url.includes('/watch');
+    return url.includes('/watch') || url.includes('/shorts/');
+  }
+  
+  function isShortsPage() {
+    const url = window.location.href;
+    return url.includes('/shorts/');
   }
   
   function isChannelPage() {
     const channelIdentifier = extractChannelIdentifier();
-    return channelIdentifier !== null;
+    return channelIdentifier !== null && !isVideoPage();
   }
 
-  function extractVideoIdsFromHTML(html) {
-    const videoIds = [];
+  function checkMonetizationStatus(type, id) {
+    const cacheKey = `${type}_${id}`;
     
-    const videoIdRegex = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
-    let match;
+    if (statusCache[cacheKey] !== undefined) {
+      return Promise.resolve(statusCache[cacheKey]);
+    }
     
-    while ((match = videoIdRegex.exec(html)) !== null) {
-      const videoId = match[1];
-      if (!videoIds.includes(videoId)) {
-        videoIds.push(videoId);
-      }
+    return new Promise((resolve, reject) => {
+      const apiUrl = `${API_BASE_URL}/${type}/${id}`;
       
-      if (videoIds.length >= 3) break;
-    }
-    
-    return videoIds;
-  }
-
-  function scrapeChannelVideos(channelIdentifier) {
-    return new Promise((resolve, reject) => {
-      const channelURL = channelIdentifier.startsWith('@') 
-        ? `https://www.youtube.com/${channelIdentifier}/videos`
-        : `https://www.youtube.com/channel/${channelIdentifier}/videos`;
-
       GM_xmlhttpRequest({
         method: "GET",
-        url: channelURL,
+        url: apiUrl,
+        timeout: 10000,
         onload: function(response) {
           if (response.status === 200) {
-            const videoIds = extractVideoIdsFromHTML(response.responseText);
-            if (videoIds.length > 0) {
-              resolve(videoIds);
-            } else {
-              const ytInitialDataMatch = response.responseText.match(/var ytInitialData = (.+?);<\/script>/s);
-              if (ytInitialDataMatch && ytInitialDataMatch[1]) {
-                const ytInitialData = JSON.parse(ytInitialDataMatch[1]);
-                const tabs = ytInitialData.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
-                let videosTab = null;
-                
-                for (const tab of tabs) {
-                  if (tab.tabRenderer && tab.tabRenderer.title === "Videos") {
-                    videosTab = tab;
-                    break;
-                  }
-                }
-                
-                if (!videosTab) {
-                  reject(new Error("Could not find videos tab"));
-                  return;
-                }
-                
-                const items = videosTab.tabRenderer?.content?.richGridRenderer?.contents || [];
-                const extractedVideoIds = [];
-                
-                for (const item of items) {
-                  if (item.richItemRenderer && item.richItemRenderer.content?.videoRenderer) {
-                    const videoRenderer = item.richItemRenderer.content.videoRenderer;
-                    
-                    if (videoRenderer.badges) {
-                      const isLiveOrUpcoming = videoRenderer.badges.some(badge => 
-                        badge.metadataBadgeRenderer && 
-                        (badge.metadataBadgeRenderer.label === "LIVE" || 
-                         badge.metadataBadgeRenderer.label === "UPCOMING" ||
-                         badge.metadataBadgeRenderer.label.includes("Premiere"))
-                      );
-                      
-                      if (isLiveOrUpcoming) continue;
-                    }
-                    
-                    if (videoRenderer.videoId) {
-                      extractedVideoIds.push(videoRenderer.videoId);
-                      
-                      if (extractedVideoIds.length >= 3) break;
-                    }
-                  }
-                }
-                
-                if (extractedVideoIds.length > 0) {
-                  resolve(extractedVideoIds);
-                } else {
-                  reject(new Error("No video IDs found"));
-                }
-              } else {
-                reject(new Error("No video IDs found"));
-              }
+            try {
+              const result = JSON.parse(response.responseText);
+              const isMonetized = result.monetization === true;
+              
+              statusCache[cacheKey] = isMonetized;
+              
+              resolve(isMonetized);
+            } catch (error) {
+              reject(new Error("Invalid API response"));
             }
           } else {
-            reject(new Error(`Failed to fetch channel page: ${response.status}`));
+            reject(new Error(`API request failed: ${response.status}`));
           }
         },
         onerror: function(error) {
           reject(error);
-        }
-      });
-    });
-  }
-
-  function getChannelVideosFromDOM() {
-    const videoIds = [];
-    
-    const videoElements = document.querySelectorAll('a#video-title-link, a#thumbnail[href*="/watch"]');
-    
-    for (const element of videoElements) {
-      const href = element.getAttribute('href');
-      if (href && href.includes('/watch?v=')) {
-        const videoId = new URL('https://www.youtube.com' + href).searchParams.get('v');
-        if (videoId && !videoIds.includes(videoId)) {
-          videoIds.push(videoId);
-          
-          if (videoIds.length >= 3) break;
-        }
-      }
-    }
-    
-    return videoIds.length > 0 ? videoIds : null;
-  }
-
-  function checkVideoForAds(videoId) {
-    return new Promise((resolve, reject) => {
-      GM_xmlhttpRequest({
-        method: "GET",
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        onload: function(response) {
-          if (response.status === 200) {
-            const hasConfirmDialog = response.responseText.includes("confirmDialogEndpoint");
-            
-            const hasMonetizationURL = response.responseText.includes("https://lh3.googleusercontent.com/U3yX7Zs53bdY6Talo8egW_Jnc80oCeWTXOtKN6JVRjKnY14xs8tnc5Zvvew5JTUjl9EGNNR_kw9pJCoJ");
-            
-            if (hasConfirmDialog && hasMonetizationURL) {
-              resolve(true);
-              return;
-            }
-            
-            if (hasConfirmDialog && !hasMonetizationURL) {
-              resolve(false);
-              return;
-            }
-            
-            const hasAds = response.responseText.includes("yt_ad");
-            resolve(hasAds);
-          } else {
-            reject(new Error(`Failed to fetch video: ${response.status}`));
-          }
         },
-        onerror: function(error) {
-          reject(error);
+        ontimeout: function() {
+          reject(new Error("Request timed out"));
         }
       });
     });
@@ -433,7 +333,8 @@
 
     checkQueue = checkQueue.then(() => {
       return performMonetizationCheck(forceCheck);
-    }).catch(error => {
+    }).catch((error) => {
+      console.error("Error checking monetization:", error);
       isCheckingMonetization = false;
     });
   }
@@ -457,54 +358,40 @@
     isCheckingMonetization = true;
 
     try {
-      if (isVideoPage() || isChannelPage()) {
+      if (isVideoPage()) {
+        const videoId = extractVideoId();
+        
+        if (!videoId) {
+          throw new Error("Could not determine video ID");
+        }
+        
+        await showVideoSpinner();
+        
+        const endpoint = isShortsPage() ? "shorts" : "video";
+        const isMonetized = await checkMonetizationStatus(endpoint, videoId);
+        
+        await updateVideoPage(isMonetized);
+      } 
+      else if (isChannelPage()) {
         const channelId = extractChannelIdentifier();
         
         if (!channelId) {
           throw new Error("Could not determine channel ID");
         }
         
-        if (isVideoPage()) {
-          await showVideoSpinner();
-        } else {
-          await showChannelSpinner();
-        }
+        await showChannelSpinner();
         
-        let videoIds = await scrapeChannelVideos(channelId);
+        const isMonetized = await checkMonetizationStatus("channel", channelId);
         
-        if (!videoIds || videoIds.length === 0) {
-          videoIds = getChannelVideosFromDOM();
-        }
-        
-        if ((!videoIds || videoIds.length === 0) && isVideoPage()) {
-          const currentVideoId = extractVideoId();
-          if (currentVideoId) {
-            videoIds = [currentVideoId];
-          }
-        }
-        
-        if (!videoIds || videoIds.length === 0) {
-          throw new Error("Could not find any videos to check");
-        }
-        
-        const checkPromises = videoIds.map(videoId => {
-          return checkVideoForAds(videoId).catch(() => false);
-        });
-        
-        const results = await Promise.all(checkPromises);
-        const isMonetized = results.some(result => result === true);
-        
-        if (isVideoPage()) {
-          await updateVideoPage(isMonetized);
-        } else {
-          await updateChannelPage(isMonetized);
-        }
+        await updateChannelPage(isMonetized);
       }
     } catch (error) {
+      console.error("Monetization check failed:", error);
+      
       if (isVideoPage()) {
-        await updateVideoPage(false);
+        await updateVideoPage(false, true);
       } else if (isChannelPage()) {
-        await updateChannelPage(false);
+        await updateChannelPage(false, true);
       }
     } finally {
       isCheckingMonetization = false;
@@ -601,7 +488,7 @@
     return spinner;
   }
 
-  async function updateChannelPage(isMonetized) {
+  async function updateChannelPage(isMonetized, isError = false) {
     const titleElement = await findChannelTitleElement();
     if (!titleElement) {
       return;
@@ -614,7 +501,12 @@
 
     const monetizationIcon = createMonetizationIcon(isMonetized, false);
     monetizationIcon.classList.add("yt-monetization-icon");
-    monetizationIcon.title = isMonetized ? "Channel is monetized" : "Channel is not monetized";
+    
+    if (isError) {
+      monetizationIcon.title = "Failed to check monetization status";
+    } else {
+      monetizationIcon.title = isMonetized ? "Channel is monetized" : "Channel is not monetized";
+    }
 
     const channelNameContainer = titleElement.closest('h1') || titleElement.parentNode;
     
@@ -623,9 +515,13 @@
     } else {
       titleElement.appendChild(monetizationIcon);
     }
+    
+    monetizationIcon.addEventListener('click', () => {
+      queueMonetizationCheck(true);
+    });
   }
   
-  async function updateVideoPage(isMonetized) {
+  async function updateVideoPage(isMonetized, isError = false) {
     const channelElement = await findVideoChannelElement();
     if (!channelElement) {
       return;
@@ -638,7 +534,12 @@
     
     const monetizationIcon = createMonetizationIcon(isMonetized, true);
     monetizationIcon.classList.add("yt-video-monetization-icon");
-    monetizationIcon.title = isMonetized ? "Channel is monetized" : "Channel is not monetized";
+    
+    if (isError) {
+      monetizationIcon.title = "Failed to check monetization status";
+    } else {
+      monetizationIcon.title = isMonetized ? "Channel is monetized" : "Channel is not monetized";
+    }
     
     const badgeContainer = channelElement.querySelector("ytd-badge-supported-renderer");
     
@@ -647,14 +548,22 @@
     } else {
       channelElement.appendChild(monetizationIcon);
     }
+    
+    monetizationIcon.addEventListener('click', () => {
+      queueMonetizationCheck(true);
+    });
   }
 
-  function setupImprovedUrlChangeDetection() {
+  function setupUrlChangeDetection() {
     let lastPath = window.location.pathname;
     let lastSearch = window.location.search;
     let lastVideoId = extractVideoId();
     let lastChannelId = extractChannelIdentifier();
     let lastHref = window.location.href;
+    
+    setInterval(() => {
+      statusCache = {};
+    }, 30 * 60 * 1000);
 
     function checkForChanges() {
       const currentPath = window.location.pathname;
@@ -687,7 +596,8 @@
               if (node.id === 'content' || 
                   node.id === 'page-manager' || 
                   node.tagName === 'YTD-WATCH-FLEXY' ||
-                  node.tagName === 'YTD-BROWSE') {
+                  node.tagName === 'YTD-BROWSE' ||
+                  node.tagName === 'YTD-REEL-WATCH-RENDERER') {
                 checkForChanges();
                 break;
               }
@@ -736,6 +646,7 @@
   }
 
   queueMonetizationCheck(true);
-  setupImprovedUrlChangeDetection();
+  setupUrlChangeDetection();
+  
   window.checkYoutubeMonetization = () => queueMonetizationCheck(true);
 })();

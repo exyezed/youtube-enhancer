@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Channel ID)
 // @description  Reveal Channel ID.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.5
+// @version      1.6
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -21,7 +21,6 @@
     let isRequestInProgress = false;
     const channelCache = {};
     let processingLock = false;
-    let currentUrl = window.location.href;
     
     function throttle(func, limit) {
         let lastCall = 0;

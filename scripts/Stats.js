@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Stats)
 // @description  Add a Stats Button.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.7
+// @version      1.8
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -54,6 +54,7 @@
             align-items: center;
             justify-content: center;
             margin-top: 16px;
+            margin-bottom: 16px;
             width: 48px;
             height: 48px;
             border-radius: 50%;

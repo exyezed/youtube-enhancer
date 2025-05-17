@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Reveal Country Flag.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.7
+// @version      1.8
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -11,6 +11,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @require      https://cdn.jsdelivr.net/npm/date-fns@4.1.0/cdn.min.js
 // ==/UserScript==
 
 (function () {
@@ -36,6 +37,7 @@
     };
 
     const processedElements = new Set();
+    const processedChannelAge = new Set();
 
     function getCacheKey(type, id) {
         return `${CACHE_CONFIG.PREFIX}${type}_${id}`;
@@ -60,7 +62,12 @@
 
     async function getCountryData(type, id) {
         const cachedValue = getFromCache(type, id);
-        if (cachedValue) return cachedValue;
+        if (cachedValue) {
+            if (cachedValue.creationDate) {
+                cachedValue.channelAge = calculateChannelAge(cachedValue.creationDate);
+            }
+            return cachedValue;
+        }
 
         const url = `https://flagscountry.vercel.app/api/${type}/${id}`;
         return new Promise((resolve) => {
@@ -73,7 +80,9 @@
                             const data = JSON.parse(response.responseText);
                             const countryData = {
                                 code: data.country.toLowerCase(),
-                                name: data.countryName
+                                name: data.countryName,
+                                creationDate: data.creationDate,
+                                channelAge: data.creationDate ? calculateChannelAge(data.creationDate) : data.channelAge
                             };
                             setToCache(type, id, countryData);
                             resolve(countryData);
@@ -98,6 +107,69 @@
         });
     }
 
+    function calculateChannelAge(creationDateStr) {
+        try {
+            const creationDate = new Date(creationDateStr);
+            const now = new Date();
+
+            if (!creationDate || isNaN(creationDate.getTime())) {
+                return "";
+            }
+
+            const years = dateFns.differenceInYears(now, creationDate);
+            let tempDate = dateFns.addYears(creationDate, years);
+
+            const months = dateFns.differenceInMonths(now, tempDate);
+            tempDate = dateFns.addMonths(tempDate, months);
+
+            const days = dateFns.differenceInDays(now, tempDate);
+            tempDate = dateFns.addDays(tempDate, days);
+
+            const hours = dateFns.differenceInHours(now, tempDate);
+            tempDate = dateFns.addHours(tempDate, hours);
+
+            const minutes = dateFns.differenceInMinutes(now, tempDate);
+
+            let ageString = "";
+
+            if (years > 0) {
+                ageString += `${years}y`;
+
+                if (months > 0) {
+                    ageString += ` ${months}m`;
+                }
+            } else if (months > 0) {
+                ageString += `${months}m`;
+
+                if (days > 0) {
+                    ageString += ` ${days}d`;
+                }
+            } else if (days > 0) {
+                ageString += `${days}d`;
+
+                if (hours > 0) {
+                    ageString += ` ${hours}h`;
+                }
+            } else if (hours > 0) {
+                ageString += `${hours}h`;
+
+                if (minutes > 0) {
+                    ageString += ` ${minutes}m`;
+                }
+            } else if (minutes > 0) {
+                ageString += `${minutes}m`;
+            } else {
+                ageString += "<1m";
+            }
+
+            ageString += " ago";
+            return ageString;
+        } catch (error) {
+            console.error('Error calculating channel age:', error);
+            return "";
+        }
+    }
+
     function createFlag(size, margin, className, countryData) {
         const flag = document.createElement('img');
         flag.src = `${FLAG_CONFIG.BASE_URL}${countryData.code}.svg`;
@@ -116,6 +188,50 @@
         existingFlags.forEach(flag => flag.remove());
     }
 
+    function removeExistingChannelAge() {
+        const ageElements = document.querySelectorAll('.channel-age-element');
+        ageElements.forEach(el => el.remove());
+
+        const delimiterElements = document.querySelectorAll('.channel-age-delimiter');
+        delimiterElements.forEach(el => el.remove());
+    }
+
+    function addChannelAge(countryData) {
+        if (!countryData || !countryData.channelAge) return;
+
+        removeExistingChannelAge();
+
+        const metadataRows = document.querySelectorAll('.yt-content-metadata-view-model-wiz__metadata-row');
+        if (!metadataRows.length) return;
+
+        for (const row of metadataRows) {
+            if (row.textContent.includes('video') && !processedChannelAge.has(row)) {
+                processedChannelAge.add(row);
+
+                const delimiter = document.createElement('span');
+                delimiter.className = 'yt-content-metadata-view-model-wiz__delimiter channel-age-delimiter';
+                delimiter.setAttribute('aria-hidden', 'true');
+                delimiter.textContent = '•';
+
+                const ageSpan = document.createElement('span');
+                ageSpan.className = 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color channel-age-element';
+                ageSpan.setAttribute('dir', 'auto');
+                ageSpan.setAttribute('role', 'text');
+
+                const innerSpan = document.createElement('span');
+                innerSpan.setAttribute('dir', 'auto');
+                innerSpan.textContent = ` ${countryData.channelAge}`;
+
+                ageSpan.appendChild(innerSpan);
+
+                row.appendChild(delimiter);
+                row.appendChild(ageSpan);
+
+                break;
+            }
+        }
+    }
+
     async function addFlag() {
         const channelElement = document.querySelector('.dynamic-text-view-model-wiz__h1 .yt-core-attributed-string');
         if (channelElement && !processedElements.has(channelElement)) {
@@ -130,6 +246,8 @@
                 channelElement.appendChild(
                     createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryData)
                 );
+
+                addChannelAge(countryData);
             }
         }
 
@@ -189,20 +307,32 @@
     });
 
     function startObserver() {
-        observer.observe(document.querySelector('ytd-browse, ytd-watch-flexy, #content'), {
+        const watchPage = document.querySelector('ytd-watch-flexy');
+        const browsePage = document.querySelector('ytd-browse');
+        const content = document.querySelector('#content');
+
+        const targetNode = watchPage || browsePage || content || document.body;
+
+        observer.observe(targetNode, {
             childList: true,
             subtree: true
         });
     }
 
-    function init() {
+    async function init() {
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         processedElements.clear();
+        processedChannelAge.clear();
+        removeExistingChannelAge();
         startObserver();
         addFlag();
 
         window.addEventListener('yt-navigate-finish', () => {
             observer.disconnect();
             processedElements.clear();
+            processedChannelAge.clear();
+            removeExistingChannelAge();
             startObserver();
             addFlag();
         });

@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Views & Upload Time)
 // @description  Reveal Views & Upload Time.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.2
+// @version      1.3
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -60,31 +60,6 @@
             background-color: var(--yt-spec-text-secondary, #606060);
         }
 
-        .revealViewsAndUploadTime-shorts {
-            height: 48px;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 36px;
-            padding: 0 16px;
-            font-family: inherit;
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            z-index: 1000;
-            background-color: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .revealViewsAndUploadTime-shorts .separator {
-            margin: 0 2px;
-            width: 1px;
-            height: 36px;
-            opacity: 0.3;
-            background-color: #fff;
-        }
-
         .material-symbols-outlined {
             font-size: 24px;
             line-height: 1;
@@ -96,93 +71,50 @@
         }
     `;
 
-    function createBadge(viewCount, uploadTime, uploadDate, isShorts = false) {
-        if (isShorts) {
-            const badge = document.createElement('div');
-            badge.className = 'revealViewsAndUploadTime-shorts';
-    
-            const viewIcon = document.createElement('span');
-            viewIcon.className = 'material-symbols-outlined';
-            viewIcon.textContent = 'visibility';
-    
-            const viewSpan = document.createElement('span');
-            viewSpan.textContent = viewCount;
-    
-            const separator1 = document.createElement('div');
-            separator1.className = 'separator';
-    
-            const dateIcon = document.createElement('span');
-            dateIcon.className = 'material-symbols-outlined';
-            dateIcon.textContent = 'calendar_month';
-    
-            const dateSpan = document.createElement('span');
-            dateSpan.textContent = uploadDate;
-    
-            const separator2 = document.createElement('div');
-            separator2.className = 'separator';
-    
-            const timeIcon = document.createElement('span');
-            timeIcon.className = 'material-symbols-outlined';
-            timeIcon.textContent = 'schedule';
-    
-            const timeSpan = document.createElement('span');
-            timeSpan.textContent = uploadTime;
-    
-            badge.appendChild(viewIcon);
-            badge.appendChild(viewSpan);
-            badge.appendChild(separator1);
-            badge.appendChild(dateIcon);
-            badge.appendChild(dateSpan);
-            badge.appendChild(separator2);
-            badge.appendChild(timeIcon);
-            badge.appendChild(timeSpan);
-    
-            return badge;
-        } else {
-            const badge = document.createElement('div');
-            badge.className = 'revealViewsAndUploadTime';
-    
-            const mainIcon = document.createElement('span');
-            mainIcon.className = 'material-symbols-outlined';
-            mainIcon.textContent = 'visibility';
-    
-            const dataSpan = document.createElement('span');
-            dataSpan.textContent = viewCount;
-    
-            const separator = document.createElement('div');
-            separator.className = 'separator';
-    
-            const timeIcon = document.createElement('span');
-            timeIcon.className = 'material-symbols-outlined';
-            timeIcon.textContent = 'schedule';
-    
-            const timeSpan = document.createElement('span');
-            timeSpan.textContent = uploadTime;
-    
-            badge.appendChild(mainIcon);
-            badge.appendChild(dataSpan);
-            badge.appendChild(separator);
-            badge.appendChild(timeIcon);
-            badge.appendChild(timeSpan);
-    
-            let isShowingViews = true;
-            badge.addEventListener('click', () => {
-                if (isShowingViews) {
-                    mainIcon.textContent = 'calendar_month';
-                    dataSpan.textContent = uploadDate;
-                    timeIcon.textContent = 'schedule';
-                    timeIcon.style.display = '';
-                } else {
-                    mainIcon.textContent = 'visibility';
-                    dataSpan.textContent = viewCount;
-                    timeIcon.textContent = 'schedule';
-                    timeIcon.style.display = '';
-                }
-                isShowingViews = !isShowingViews;
-            });
-    
-            return badge;
-        }
+    function createBadge(viewCount, uploadTime, uploadDate) {
+        const badge = document.createElement('div');
+        badge.className = 'revealViewsAndUploadTime';
+
+        const mainIcon = document.createElement('span');
+        mainIcon.className = 'material-symbols-outlined';
+        mainIcon.textContent = 'visibility';
+
+        const dataSpan = document.createElement('span');
+        dataSpan.textContent = viewCount;
+
+        const separator = document.createElement('div');
+        separator.className = 'separator';
+
+        const timeIcon = document.createElement('span');
+        timeIcon.className = 'material-symbols-outlined';
+        timeIcon.textContent = 'schedule';
+
+        const timeSpan = document.createElement('span');
+        timeSpan.textContent = uploadTime;
+
+        badge.appendChild(mainIcon);
+        badge.appendChild(dataSpan);
+        badge.appendChild(separator);
+        badge.appendChild(timeIcon);
+        badge.appendChild(timeSpan);
+
+        let isShowingViews = true;
+        badge.addEventListener('click', () => {
+            if (isShowingViews) {
+                mainIcon.textContent = 'calendar_month';
+                dataSpan.textContent = uploadDate;
+                timeIcon.textContent = 'schedule';
+                timeIcon.style.display = '';
+            } else {
+                mainIcon.textContent = 'visibility';
+                dataSpan.textContent = viewCount;
+                timeIcon.textContent = 'schedule';
+                timeIcon.style.display = '';
+            }
+            isShowingViews = !isShowingViews;
+        });
+
+        return badge;
     }
 
     function getVideoId() {
@@ -191,8 +123,6 @@
             return urlObj.searchParams.get('v');
         } else if (urlObj.pathname.includes('/video/')) {
             return urlObj.pathname.split('/video/')[1];
-        } else if (urlObj.pathname.includes('/shorts/')) {
-            return urlObj.pathname.split('/shorts/')[1];
         }
         return null;
     }
@@ -306,27 +236,19 @@
         }
     }
 
-    function updateBadge(viewCount, uploadTime, uploadDate, isShorts = false) {
-        let badge = document.querySelector(isShorts ? '.revealViewsAndUploadTime-shorts' : '.revealViewsAndUploadTime');
+    function updateBadge(viewCount, uploadTime, uploadDate) {
+        let badge = document.querySelector('.revealViewsAndUploadTime');
         if (badge) {
             badge.remove();
         }
-        insertBadge(viewCount, uploadTime, uploadDate, isShorts);
+        insertBadge(viewCount, uploadTime, uploadDate);
     }
 
-    function insertBadge(viewCount, uploadTime, uploadDate, isShorts = false) {
-        if (isShorts) {
-            const target = document.querySelector('ytd-reel-video-renderer[is-active]');
-            if (target && !document.querySelector('.revealViewsAndUploadTime-shorts')) {
-                const badge = createBadge(viewCount, uploadTime, uploadDate, isShorts);
-                target.appendChild(badge);
-            }
-        } else {
-            const targetElement = document.querySelector('#secondary-inner #panels');
-            if (targetElement && !document.querySelector('.revealViewsAndUploadTime')) {
-                const badge = createBadge(viewCount, uploadTime, uploadDate, isShorts);
-                targetElement.parentNode.insertBefore(badge, targetElement);
-            }
+    function insertBadge(viewCount, uploadTime, uploadDate) {
+        const targetElement = document.querySelector('#secondary-inner #panels');
+        if (targetElement && !document.querySelector('.revealViewsAndUploadTime')) {
+            const badge = createBadge(viewCount, uploadTime, uploadDate);
+            targetElement.parentNode.insertBefore(badge, targetElement);
         }
     }
 
@@ -339,30 +261,29 @@
         }
     }
 
-    async function updateBadgeWithInfo(videoId, isShorts = false) {
-        updateBadge('Loading...', 'Loading...', 'Loading...', isShorts);
+    async function updateBadgeWithInfo(videoId) {
+        updateBadge('Loading...', 'Loading...', 'Loading...');
         try {
             const videoInfo = await fetchVideoInfo(videoId);
             if (videoInfo) {
                 const uploadTime = formatTime(videoInfo.uploadDate);
                 const formattedUploadDate = formatDate(videoInfo.uploadDate);
-                updateBadge(videoInfo.viewCount, uploadTime, formattedUploadDate, isShorts);
+                updateBadge(videoInfo.viewCount, uploadTime, formattedUploadDate);
             } else {
-                updateBadge('Error', 'Error', 'Error', isShorts);
+                updateBadge('Error', 'Error', 'Error');
             }
         } catch (error) {
-            updateBadge('Error', 'Error', 'Error', isShorts);
+            updateBadge('Error', 'Error', 'Error');
         }
     }
 
     function init() {
         addStyles();
         const videoId = getVideoId();
-        const isShorts = window.location.pathname.startsWith('/shorts/');
         if (videoId) {
-            updateBadgeWithInfo(videoId, isShorts);
+            updateBadgeWithInfo(videoId);
         } else {
-            updateBadge('N/A', 'N/A', 'N/A', isShorts);
+            updateBadge('N/A', 'N/A', 'N/A');
         }
     }
 
@@ -373,13 +294,12 @@
         const observer = new MutationObserver(() => {
             if (location.href !== lastUrl) {
                 lastUrl = location.href;
-                const isShorts = window.location.pathname.startsWith('/shorts/');
                 const currentVideoId = getVideoId();
                 if (currentVideoId && currentVideoId !== lastVideoId) {
                     lastVideoId = currentVideoId;
-                    updateBadgeWithInfo(currentVideoId, isShorts);
+                    updateBadgeWithInfo(currentVideoId);
                 } else if (!currentVideoId) {
-                    updateBadge('Not a video', 'Not a video', 'Not a video', isShorts);
+                    updateBadge('Not a video', 'Not a video', 'Not a video');
                 }
             }
         });
@@ -398,17 +318,15 @@
     }
 
     window.addEventListener('yt-navigate-start', function() {
-        const isShorts = window.location.pathname.startsWith('/shorts/');
-        updateBadge('Loading...', 'Loading...', 'Loading...', isShorts);
+        updateBadge('Loading...', 'Loading...', 'Loading...');
     });
 
     window.addEventListener('yt-navigate-finish', function() {
-        const isShorts = window.location.pathname.startsWith('/shorts/');
         const videoId = getVideoId();
         if (videoId) {
-            updateBadgeWithInfo(videoId, isShorts);
+            updateBadgeWithInfo(videoId);
         } else {
-            updateBadge('Not a video', 'Not a video', 'Not a video', isShorts);
+            updateBadge('Not a video', 'Not a video', 'Not a video');
         }
     });
 })();

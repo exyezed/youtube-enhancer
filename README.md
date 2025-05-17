@@ -72,10 +72,6 @@ Reveal Views & Upload Time.
 
 ![detail_views](https://github.com/user-attachments/assets/176e0a7b-c79c-46de-b3b6-6366f3a93cf9)
 
-> Shorts
-
-![view_shorts](https://github.com/user-attachments/assets/b22b468d-de51-45d6-a866-c9e647f76878)
-
 ## 5. Reveal Video & Shorts Category
 
 Reveal Video & Shorts Category.

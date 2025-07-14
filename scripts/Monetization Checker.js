@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Monetization Checker)
 // @description  Check the Monetization Status.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.5
+// @version      1.6
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -10,17 +10,21 @@
 // @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      monetizationcheck.vercel.app
+// @connect      monetcheck.vercel.app
 // ==/UserScript==
 
 (function () {
   "use strict";
-
   let lastCheckedUrl = "";
   let lastCheckedChannelId = null;
   let isCheckingMonetization = false;
   let checkQueue = Promise.resolve();
-  const API_BASE_URL = "https://monetizationcheck.vercel.app";
-  let statusCache = {}; 
+  const API_ENDPOINTS = [
+    "https://monetizationcheck.vercel.app",
+    "https://monetcheck.vercel.app"
+  ];
+  let currentApiIndex = 0;
+  let statusCache = {};
 
   function addGlobalStyles() {
     const styleElement = document.createElement('style');
@@ -285,6 +289,11 @@
     const channelIdentifier = extractChannelIdentifier();
     return channelIdentifier !== null && !isVideoPage();
   }
+  function getNextApiEndpoint() {
+    const endpoint = API_ENDPOINTS[currentApiIndex];
+    currentApiIndex = (currentApiIndex + 1) % API_ENDPOINTS.length;
+    return endpoint;
+  }
 
   function checkMonetizationStatus(type, id) {
     const cacheKey = `${type}_${id}`;
@@ -294,35 +303,73 @@
     }
     
     return new Promise((resolve, reject) => {
-      const apiUrl = `${API_BASE_URL}/${type}/${id}`;
-      
-      GM_xmlhttpRequest({
-        method: "GET",
-        url: apiUrl,
-        timeout: 10000,
-        onload: function(response) {
-          if (response.status === 200) {
-            try {
-              const result = JSON.parse(response.responseText);
-              const isMonetized = result.monetization === true;
-              
-              statusCache[cacheKey] = isMonetized;
-              
-              resolve(isMonetized);
-            } catch (error) {
-              reject(new Error("Invalid API response"));
+      const tryWithApi = (apiEndpoint, retryCount = 0) => {
+        const apiUrl = `${apiEndpoint}/${type}/${id}`;
+        
+        GM_xmlhttpRequest({
+          method: "GET",
+          url: apiUrl,
+          timeout: 10000,
+          onload: function(response) {
+            if (response.status === 200) {
+              try {
+                const result = JSON.parse(response.responseText);
+                const isMonetized = result.monetization === true;
+                
+                statusCache[cacheKey] = isMonetized;
+                
+                resolve(isMonetized);
+              } catch (error) {
+                // Try next API endpoint if JSON parsing fails
+                if (retryCount < API_ENDPOINTS.length - 1) {
+                  const nextApiEndpoint = getNextApiEndpoint();
+                  tryWithApi(nextApiEndpoint, retryCount + 1);
+                } else {
+                  reject(new Error("Invalid API response from all endpoints"));
+                }
+              }
+            } else if (response.status === 429 || response.status >= 500) {
+              // Rate limited or server error, try next API endpoint
+              if (retryCount < API_ENDPOINTS.length - 1) {
+                const nextApiEndpoint = getNextApiEndpoint();
+                tryWithApi(nextApiEndpoint, retryCount + 1);
+              } else {
+                reject(new Error(`API request failed on all endpoints: ${response.status}`));
+              }
+            } else {
+              // Other errors, try next API endpoint
+              if (retryCount < API_ENDPOINTS.length - 1) {
+                const nextApiEndpoint = getNextApiEndpoint();
+                tryWithApi(nextApiEndpoint, retryCount + 1);
+              } else {
+                reject(new Error(`API request failed: ${response.status}`));
+              }
             }
-          } else {
-            reject(new Error(`API request failed: ${response.status}`));
+          },
+          onerror: function(error) {
+            // Network error, try next API endpoint
+            if (retryCount < API_ENDPOINTS.length - 1) {
+              const nextApiEndpoint = getNextApiEndpoint();
+              tryWithApi(nextApiEndpoint, retryCount + 1);
+            } else {
+              reject(error);
+            }
+          },
+          ontimeout: function() {
+            // Timeout, try next API endpoint
+            if (retryCount < API_ENDPOINTS.length - 1) {
+              const nextApiEndpoint = getNextApiEndpoint();
+              tryWithApi(nextApiEndpoint, retryCount + 1);
+            } else {
+              reject(new Error("Request timed out on all endpoints"));
+            }
           }
-        },
-        onerror: function(error) {
-          reject(error);
-        },
-        ontimeout: function() {
-          reject(new Error("Request timed out"));
-        }
-      });
+        });
+      };
+      
+      // Start with the next API endpoint
+      const firstApiEndpoint = getNextApiEndpoint();
+      tryWithApi(firstApiEndpoint, 0);
     });
   }
 

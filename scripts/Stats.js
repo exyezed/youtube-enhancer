@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Stats)
 // @description  Add a Stats Button.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.8
+// @version      1.9
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -255,7 +255,7 @@
     function redirectToStatsAPI() {
         const videoUrl = getCurrentVideoUrl();
         if (videoUrl) {
-            const apiUrl = `https://stats.afkarxyz.web.id/?directVideo=${encodeURIComponent(videoUrl)}`;
+            const apiUrl = `https://stats.afkarxyz.fun/?directVideo=${encodeURIComponent(videoUrl)}`;
             window.open(apiUrl, '_blank');
         }
     }
@@ -410,7 +410,7 @@
             () => {
                 const channelId = getChannelIdentifier();
                 if (channelId) {
-                    const url = `https://stats.afkarxyz.web.id/?directChannel=${channelId}`;
+                    const url = `https://stats.afkarxyz.fun/?directChannel=${channelId}`;
                     window.open(url, '_blank');
                 }
             }
@@ -431,7 +431,7 @@
                 () => {
                     const channelId = getChannelIdentifier();
                     if (channelId) {
-                        const url = `https://stats.afkarxyz.web.id/?directStream=${channelId}`;
+                        const url = `https://stats.afkarxyz.fun/?directStream=${channelId}`;
                         window.open(url, '_blank');
                     }
                 }
@@ -453,7 +453,7 @@
                 () => {
                     const channelId = getChannelIdentifier();
                     if (channelId) {
-                        const url = `https://stats.afkarxyz.web.id/?directShorts=${channelId}`;
+                        const url = `https://stats.afkarxyz.fun/?directShorts=${channelId}`;
                         window.open(url, '_blank');
                     }
                 }

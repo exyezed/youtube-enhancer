@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Loop & Screenshot Buttons)
 // @description  Add Loop, Save and Copy Screenshot Buttons.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.5
+// @version      1.6
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -52,14 +52,15 @@
     a.buttonLoopAndScreenshot-save-screenshot-button.clicked svg,
     a.buttonLoopAndScreenshot-copy-screenshot-button.clicked svg {
         fill: url(#successGradient);
-    }
-
+    }    
+        
     .buttonLoopAndScreenshot-shorts-save-button,
     .buttonLoopAndScreenshot-shorts-copy-button {
         display: flex;
         align-items: center;
         justify-content: center;
         margin-top: 16px;
+        margin-bottom: 16px;
         width: 48px;
         height: 48px;
         border-radius: 50%;
@@ -496,22 +497,17 @@
         init() {
             this.insertSaveScreenshotElement();
             this.insertCopyScreenshotElement();
-        },
-    
+        },        
+        
         insertSaveScreenshotElement() {
-            const shortsContainer = document.querySelector('ytd-reel-video-renderer[is-active] #actions');
-            if (shortsContainer && !shortsContainer.querySelector('.buttonLoopAndScreenshot-shorts-save-button')) {
+            const likeButtonContainer = document.querySelector('ytd-reel-video-renderer[is-active] #like-button');
+            if (likeButtonContainer && !document.querySelector('.buttonLoopAndScreenshot-shorts-save-button')) {
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'buttonLoopAndScreenshot-shorts-save-button';
                 iconDiv.title = 'Save Screenshot';
                 iconDiv.appendChild(iconUtils.createSaveScreenshotIcon(true));
                 
-                const customShortsIcon = shortsContainer.querySelector('#custom-shorts-icon');
-                if (customShortsIcon) {
-                    customShortsIcon.parentNode.insertBefore(iconDiv, customShortsIcon);
-                } else {
-                    shortsContainer.insertBefore(iconDiv, shortsContainer.firstChild);
-                }
+                likeButtonContainer.parentNode.insertBefore(iconDiv, likeButtonContainer);
     
                 iconDiv.addEventListener('click', (event) => {
                     const button = event.currentTarget;
@@ -525,25 +521,21 @@
                 });
             }
         },
-        
+          
         insertCopyScreenshotElement() {
-            const shortsContainer = document.querySelector('ytd-reel-video-renderer[is-active] #actions');
-            if (shortsContainer && !shortsContainer.querySelector('.buttonLoopAndScreenshot-shorts-copy-button')) {
+            const likeButtonContainer = document.querySelector('ytd-reel-video-renderer[is-active] #like-button');
+            const saveButton = document.querySelector('.buttonLoopAndScreenshot-shorts-save-button');
+            
+            if (likeButtonContainer && !document.querySelector('.buttonLoopAndScreenshot-shorts-copy-button')) {
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'buttonLoopAndScreenshot-shorts-copy-button';
                 iconDiv.title = 'Copy Screenshot to Clipboard';
                 iconDiv.appendChild(iconUtils.createCopyScreenshotIcon(true));
                 
-                const saveButton = shortsContainer.querySelector('.buttonLoopAndScreenshot-shorts-save-button');
                 if (saveButton) {
                     saveButton.parentNode.insertBefore(iconDiv, saveButton.nextSibling);
                 } else {
-                    const customShortsIcon = shortsContainer.querySelector('#custom-shorts-icon');
-                    if (customShortsIcon) {
-                        customShortsIcon.parentNode.insertBefore(iconDiv, customShortsIcon);
-                    } else {
-                        shortsContainer.insertBefore(iconDiv, shortsContainer.firstChild);
-                    }
+                    likeButtonContainer.parentNode.insertBefore(iconDiv, likeButtonContainer);
                 }
     
                 iconDiv.addEventListener('click', (event) => {

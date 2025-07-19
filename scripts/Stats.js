@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Stats)
 // @description  Add a Stats Button.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.9
+// @version      2.0
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -268,14 +268,14 @@
             const statsIcon = createStatsIcon();
             target.appendChild(statsIcon);
         }
-    }
-
+    }    
+    
     function insertIconForShorts() {
-        const shortsContainer = document.querySelector('ytd-reel-video-renderer[is-active] #actions');
+        const likeButtonContainer = document.querySelector('ytd-reel-video-renderer[is-active] #like-button');
         
-        if (shortsContainer && !shortsContainer.querySelector('.shortsStats')) {
+        if (likeButtonContainer && !document.querySelector('.shortsStats')) {
             const iconDiv = createStatsIcon(true);
-            shortsContainer.insertBefore(iconDiv, shortsContainer.firstChild);
+            likeButtonContainer.parentNode.insertBefore(iconDiv, likeButtonContainer);
             return true;
         }
         return false;

@@ -44,15 +44,7 @@ View Original Avatar, Banner, Video and Shorts Thumbnails.
 
 ![panel_thumbnail](https://github.com/user-attachments/assets/91e99c9e-2ae5-4caa-9268-16f529372a3f)
 
-## 3. Sidebar Thumbnail Preview
-
-View various resolutions of video and Shorts thumbnails in the recommendation sidebar.
-
-![Installs](http://forkstats.afkarxyz.fun/installs/543835)
-
-![image](https://github.com/user-attachments/assets/ccce922a-a648-4c97-8bcc-cc019fc103e7)
-
-## 4. Loop & Screenshot Buttons
+## 3. Loop & Screenshot Buttons
 
 Add Loop, Save and Copy Screenshot Buttons.
 
@@ -66,7 +58,7 @@ Add Loop, Save and Copy Screenshot Buttons.
 
 ![image](https://github.com/user-attachments/assets/e72dadc9-44db-46cd-87cc-68ee0b973141)
 
-## 5. Reveal Views & Upload Time
+## 4. Reveal Views & Upload Time
 
 Reveal Views & Upload Time.
 
@@ -80,7 +72,7 @@ Reveal Views & Upload Time.
 
 ![detail_views](https://github.com/user-attachments/assets/176e0a7b-c79c-46de-b3b6-6366f3a93cf9)
 
-## 6. Reveal Video & Shorts Category
+## 5. Reveal Video & Shorts Category
 
 Reveal Video & Shorts Category.
 
@@ -94,7 +86,7 @@ Reveal Video & Shorts Category.
 
 ![category_shorts](https://github.com/user-attachments/assets/97421cd2-9c1b-4178-99ff-23b8d0492fef)
 
-## 7. Reveal Country Flag
+## 6. Reveal Country Flag
 
 Reveal Country Flag.
 
@@ -112,7 +104,7 @@ Reveal Country Flag.
 
 ![shorts_flag](https://github.com/user-attachments/assets/97897325-084a-4fe4-8a05-1db76adc3be9)
 
-## 8. Stats
+## 7. Stats
 
 Add a Stats Button.
 
@@ -134,7 +126,7 @@ Add a Stats Button.
 
 ![chrome_MbYUgRkckR](https://github.com/user-attachments/assets/24e2662a-8686-499c-add4-f7b4bbff81df)
 
-## 9. Real-Time Subscriber Count
+## 8. Real-Time Subscriber Count
 
 Display Real-Time Subscriber Count.
 
@@ -149,7 +141,7 @@ Display Real-Time Subscriber Count.
 
 ![realtime_subs_set](https://github.com/user-attachments/assets/be130b58-3429-4810-9722-64bdee95c610)
 
-## 10. Subtitle Downloader
+## 9. Subtitle Downloader
 
 Download Subtitles in Various Languages.
 
@@ -157,7 +149,7 @@ Download Subtitles in Various Languages.
 
 ![image](https://github.com/user-attachments/assets/97d401a4-f0b2-48cf-a22b-acfe8203a0a3)
 
-## 11. Monetization Checker
+## 10. Monetization Checker
 
 Check the Monetization Status.
 

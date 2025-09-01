@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Reveal Country Flag.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.8
+// @version      1.9
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -233,21 +233,25 @@
     }
 
     async function addFlag() {
-        const channelElement = document.querySelector('.dynamic-text-view-model-wiz__h1 .yt-core-attributed-string');
+        const channelElement = document.querySelector('h1.dynamicTextViewModelH1 > span.yt-core-attributed-string');
         if (channelElement && !processedElements.has(channelElement)) {
-            removeExistingFlags(channelElement.parentElement);
+            removeExistingFlags(channelElement.parentElement || channelElement);
             processedElements.add(channelElement);
+            let channelId = null;
             const channelUrl = window.location.pathname;
-            const channelId = channelUrl.includes('@')
-                ? channelUrl.split('@')[1].split('/')[0]
-                : channelUrl.split('/')[2];
-            const countryData = await getCountryData('channel', channelId);
-            if (countryData) {
-                channelElement.appendChild(
-                    createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryData)
-                );
-
-                addChannelAge(countryData);
+            if (channelUrl.includes('@')) {
+                channelId = channelUrl.split('@')[1].split('/')[0];
+            } else if (channelUrl.includes('/channel/')) {
+                channelId = channelUrl.split('/channel/')[1].split('/')[0];
+            }
+            if (channelId) {
+                const countryData = await getCountryData('channel', channelId);
+                if (countryData) {
+                    channelElement.appendChild(
+                        createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryData)
+                    );
+                    addChannelAge(countryData);
+                }
             }
         }
 

@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Stats)
 // @description  Add a Stats Button.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      2.0
+// @version      2.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -116,6 +116,11 @@
         .stats-menu-button {
             margin-left: 8px;
             white-space: nowrap;
+        }
+
+        .ytFlexibleActionsViewModelAction .stats-menu-container {
+            display: inline-flex;
+            align-items: center;
         }
     `;
 
@@ -343,7 +348,7 @@
         }
 
         const containerDiv = document.createElement('div');
-        containerDiv.className = 'yt-flexible-actions-view-model-wiz__action stats-menu-container';
+        containerDiv.className = 'ytFlexibleActionsViewModelAction stats-menu-container';
 
         const mainButtonViewModel = document.createElement('button-view-model');
         mainButtonViewModel.className = 'yt-spec-button-view-model main-stats-view-model';
@@ -465,13 +470,18 @@
 
         containerDiv.appendChild(horizontalMenu);
 
-        const joinButton = document.querySelector('.yt-flexible-actions-view-model-wiz__action:not(.stats-menu-container)');
-        if (joinButton) {
-            joinButton.parentNode.appendChild(containerDiv);
+        const flexibleActionsContainer = document.querySelector('yt-flexible-actions-view-model.ytFlexibleActionsViewModelHost');
+        if (flexibleActionsContainer) {
+            flexibleActionsContainer.appendChild(containerDiv);
         } else {
-            const buttonContainer = document.querySelector('#subscribe-button + #buttons');
-            if (buttonContainer) {
-                buttonContainer.appendChild(containerDiv);
+            const joinButton = document.querySelector('.yt-flexible-actions-view-model-wiz__action:not(.stats-menu-container)');
+            if (joinButton) {
+                joinButton.parentNode.appendChild(containerDiv);
+            } else {
+                const buttonContainer = document.querySelector('#subscribe-button + #buttons');
+                if (buttonContainer) {
+                    buttonContainer.appendChild(containerDiv);
+                }
             }
         }
 
@@ -479,9 +489,15 @@
     }
 
     function checkAndAddMenu() {
-        const joinButton = document.querySelector('.yt-flexible-actions-view-model-wiz__action:not(.stats-menu-container)');
+        const flexibleActionsContainer = document.querySelector('yt-flexible-actions-view-model.ytFlexibleActionsViewModelHost');
         const statsMenu = document.querySelector('.stats-menu-container');
 
+        if (flexibleActionsContainer && !statsMenu) {
+            createStatsMenu();
+            return;
+        }
+
+        const joinButton = document.querySelector('.yt-flexible-actions-view-model-wiz__action:not(.stats-menu-container)');
         if (joinButton && !statsMenu) {
             createStatsMenu();
         }

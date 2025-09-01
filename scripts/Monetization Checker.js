@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Monetization Checker)
 // @description  Check the Monetization Status.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.6
+// @version      1.7
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -76,13 +76,22 @@
         height: 20px !important;
         display: block !important;
       }
-      
-      .dynamic-text-view-model-wiz__h1 {
+        .dynamic-text-view-model-wiz__h1 {
         display: flex !important;
         align-items: center !important;
       }
       
       .dynamic-text-view-model-wiz__h1 .yt-core-attributed-string {
+        display: flex !important;
+        align-items: center !important;
+      }
+      
+      .dynamicTextViewModelH1 {
+        display: flex !important;
+        align-items: center !important;
+      }
+      
+      .dynamicTextViewModelH1 .yt-core-attributed-string {
         display: flex !important;
         align-items: center !important;
       }
@@ -444,9 +453,9 @@
       isCheckingMonetization = false;
     }
   }
-
   function findChannelTitleElement(retryCount = 0, maxRetries = 5) {
     const possibleTitleSelectors = [
+      "h1.dynamicTextViewModelH1 > span.yt-core-attributed-string",
       "h1.dynamic-text-view-model-wiz__h1 .yt-core-attributed-string",
       "h1 .yt-core-attributed-string",
       "ytd-channel-name #channel-name",

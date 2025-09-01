@@ -2,717 +2,667 @@
 // @name         YouTube Enhancer (Thumbnail Preview)
 // @description  View Original Avatar, Banner, Video and Shorts Thumbnails.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.6
+// @version      1.7
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
 // @license      MIT
 // @match        https://www.youtube.com/*
+// @match        https://youtube.com/*
+// @match        https://m.youtube.com/*
 // @grant        none
+// @run-at       document-start
 // ==/UserScript==
 
-(function () {
-  "use strict";
+(function() {
+    'use strict';
 
-  const css = `
-        .thumbnail-overlay-container {
+    function extractVideoId(thumbnailSrc) {
+        const match = thumbnailSrc.match(/\/vi\/([^\/]+)\//);
+        return match ? match[1] : null;
+    }
+
+    function extractShortsId(href) {
+        const match = href.match(/\/shorts\/([^\/\?]+)/);
+        return match ? match[1] : null;
+    }
+
+    async function checkImageExists(url) {
+        try { 
+            const corsTest = await fetch(url, { method: 'HEAD' }).catch(() => null);
+            
+            if (corsTest) {
+                return corsTest.ok;
+            } else {
+                return true;
+            }
+            
+        } catch (error) {
+            return new Promise((resolve) => {
+                const img = document.createElement('img');
+                img.style.display = 'none';
+                
+                const timeout = setTimeout(() => {
+                    document.body.removeChild(img);
+                    resolve(false);
+                }, 2000);
+                
+                img.onload = () => {
+                    clearTimeout(timeout);
+                    document.body.removeChild(img);
+                    resolve(true);
+                };
+                
+                img.onerror = () => {
+                    clearTimeout(timeout);
+                    document.body.removeChild(img);
+                    resolve(false);
+                };
+                
+                document.body.appendChild(img);
+                img.src = url;
+            });
+        }
+    }
+
+    function createSpinner() {
+        const spinner = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        spinner.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        spinner.setAttribute('width', '16');
+        spinner.setAttribute('height', '16');
+        spinner.setAttribute('viewBox', '0 0 24 24');
+        spinner.setAttribute('fill', 'none');
+        spinner.setAttribute('stroke', 'white');
+        spinner.setAttribute('stroke-width', '2');
+        spinner.setAttribute('stroke-linecap', 'round');
+        spinner.setAttribute('stroke-linejoin', 'round');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M21 12a9 9 0 1 1-6.219-8.56');
+        spinner.appendChild(path);
+        
+        spinner.style.animation = 'spin 1s linear infinite';
+        
+        if (!document.querySelector('#spinner-keyframes')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-keyframes';
+            style.textContent = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        return spinner;
+    }
+
+    async function openThumbnail(videoId, isShorts, overlayElement) {
+        if (isShorts) {
+            const originalSvg = overlayElement.querySelector('svg');
+            const spinner = createSpinner();
+            overlayElement.replaceChild(spinner, originalSvg);
+            
+            try {
+                const oardefaultUrl = `https://i.ytimg.com/vi/${videoId}/oardefault.jpg`;
+                const isOarDefaultAvailable = await checkImageExists(oardefaultUrl);
+                
+                if (isOarDefaultAvailable) {
+                    window.open(oardefaultUrl, '_blank');
+                } else {
+                    window.open(`https://i.ytimg.com/vi/${videoId}/oar2.jpg`, '_blank');
+                }
+            } finally {
+                overlayElement.replaceChild(originalSvg, spinner);
+            }
+        } else {
+            window.open(`https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`, '_blank');
+        }
+    }
+
+    let thumbnailPreviewCurrentVideoId = "";
+    let thumbnailPreviewClosed = false;
+    let thumbnailInsertionAttempts = 0;
+    const MAX_ATTEMPTS = 10;
+    const RETRY_DELAY = 500;
+
+    function isWatchPage() {
+        const url = new URL(window.location.href);
+        return url.pathname === "/watch" && url.searchParams.has("v");
+    }
+
+    function addOrUpdateThumbnailImage() {
+        if (!isWatchPage()) return;
+
+        const newVideoId = new URLSearchParams(window.location.search).get("v");
+
+        if (newVideoId !== thumbnailPreviewCurrentVideoId) {
+            thumbnailPreviewClosed = false;
+        }
+
+        if (!newVideoId || newVideoId === thumbnailPreviewCurrentVideoId || thumbnailPreviewClosed) {
+            return;
+        }
+
+        thumbnailPreviewCurrentVideoId = newVideoId;
+
+        function attemptInsertion() {
+            const targetElement = document.querySelector("#secondary-inner #panels");
+            const existingContainer = document.getElementById("thumbnailPreview-custom-container");
+
+            if (existingContainer) {
+                const existingImg = existingContainer.querySelector("img");
+                if (existingImg) {
+                    existingImg.src = `https://i.ytimg.com/vi/${thumbnailPreviewCurrentVideoId}/mqdefault.jpg`;
+                }
+                thumbnailInsertionAttempts = 0;
+                return;
+            }
+
+            if (!targetElement) {
+                thumbnailInsertionAttempts++;
+                if (thumbnailInsertionAttempts < MAX_ATTEMPTS) {
+                    setTimeout(attemptInsertion, RETRY_DELAY);
+                } else {
+                    thumbnailInsertionAttempts = 0;
+                }
+                return;
+            }
+
+            const container = document.createElement("div");
+            container.id = "thumbnailPreview-custom-container";
+            container.style.cssText = `
+                position: relative;
+                width: 100%;
+                margin-bottom: 10px;
+                box-sizing: border-box;
+            `;
+
+            const img = document.createElement("img");
+            img.src = `https://i.ytimg.com/vi/${thumbnailPreviewCurrentVideoId}/mqdefault.jpg`;
+            img.style.cssText = `
+                width: 100%;
+                height: auto;
+                border-radius: 10px;
+                cursor: pointer;
+                display: block;
+            `;
+
+            img.addEventListener("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const maxResUrl = `https://i.ytimg.com/vi/${thumbnailPreviewCurrentVideoId}/maxresdefault.jpg`;
+                window.open(maxResUrl, '_blank');
+            });
+
+            const closeButton = document.createElement("div");
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 1001;
+                transition: all 0.2s ease;
+            `;
+
+            const closeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            closeSvg.setAttribute('width', '20');
+            closeSvg.setAttribute('height', '20');
+            closeSvg.setAttribute('viewBox', '0 0 24 24');
+            closeSvg.setAttribute('fill', 'none');
+            closeSvg.setAttribute('stroke', 'currentColor');
+            closeSvg.setAttribute('stroke-width', '2');
+            closeSvg.setAttribute('stroke-linecap', 'round');
+            closeSvg.setAttribute('stroke-linejoin', 'round');
+
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', '12');
+            circle.setAttribute('cy', '12');
+            circle.setAttribute('r', '10');
+            closeSvg.appendChild(circle);
+
+            const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path1.setAttribute('d', 'm15 9-6 6');
+            closeSvg.appendChild(path1);
+
+            const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path2.setAttribute('d', 'm9 9 6 6');
+            closeSvg.appendChild(path2);
+
+            closeButton.appendChild(closeSvg);
+
+            closeButton.onmouseenter = () => closeSvg.style.stroke = '#f50057';
+            closeButton.onmouseleave = () => closeSvg.style.stroke = 'currentColor';
+            
+            closeButton.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                thumbnailPreviewClosed = true;
+                container.remove();
+            });
+
+            container.appendChild(img);
+            container.appendChild(closeButton);
+            targetElement.parentNode.insertBefore(container, targetElement);
+            thumbnailInsertionAttempts = 0;
+        }
+
+        attemptInsertion();
+    }
+
+    function createThumbnailOverlay(videoId, container) {
+        const overlay = document.createElement('div');
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'white');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        svg.style.transition = 'stroke 0.2s ease';
+        
+        const mainRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        mainRect.setAttribute('width', '18');
+        mainRect.setAttribute('height', '18');
+        mainRect.setAttribute('x', '3');
+        mainRect.setAttribute('y', '3');
+        mainRect.setAttribute('rx', '2');
+        mainRect.setAttribute('ry', '2');
+        svg.appendChild(mainRect);
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '9');
+        circle.setAttribute('cy', '9');
+        circle.setAttribute('r', '2');
+        svg.appendChild(circle);
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'm21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21');
+        svg.appendChild(path);
+        
+        overlay.appendChild(svg);
+        
+        overlay.style.cssText = `
             position: absolute;
             bottom: 8px;
             left: 8px;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .thumbnail-overlay-button {
+            background: rgba(0, 0, 0, 0.7);
             width: 28px;
             height: 28px;
-            background: rgba(0, 0, 0, 0.7);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            position: relative;
-        }
-
-        .thumbnail-overlay-button:hover {
-            background: rgba(0, 0, 0, 0.9);
-        }
-
-        .thumbnail-overlay-button svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        .thumbnail-dropdown {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            background: rgba(0, 0, 0, 0.9);
             border-radius: 4px;
-            padding: 4px;
-            margin-bottom: 4px;
-            display: none;
-            flex-direction: column;
-            min-width: 140px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            z-index: 10000;
-        }
-
-        .thumbnail-dropdown.show {
-            display: flex !important;
-        }
-
-        .thumbnail-dropdown-item {
-            background: none;
-            border: none;
-            color: white;
-            padding: 8px 12px;
             cursor: pointer;
-            border-radius: 2px;
-            font-size: 12px;
-            text-align: left;
-            white-space: nowrap;
-            transition: background-color 0.2s ease;
-        }
-
-        .thumbnail-dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Sidebar thumbnails */
-        .yt-lockup-view-model-wiz__content-image:hover .thumbnail-overlay-container {
-            opacity: 1;
-        }
-
-        .yt-lockup-view-model-wiz__content-image {
-            position: relative;
-        }
-
-        .shortsLockupViewModelHostEndpoint:hover .thumbnail-overlay-container {
-            opacity: 1;
-        }
-
-        .shortsLockupViewModelHostEndpoint {
-            position: relative;
-        }
-
-        /* Channel page thumbnails */
-        ytd-thumbnail:hover .thumbnail-overlay-container {
-            opacity: 1;
-        }
-
-        ytd-thumbnail {
-            position: relative;
-        }
-
-        ytm-shorts-lockup-view-model:hover .thumbnail-overlay-container {
-            opacity: 1;
-        }
-
-        ytm-shorts-lockup-view-model {
-            position: relative;
-        }
-
-        /* For shorts in channel page */
-        .shortsLockupViewModelHostThumbnailContainer:hover .thumbnail-overlay-container {
-            opacity: 1;
-        }
-
-        .shortsLockupViewModelHostThumbnailContainer {
-            position: relative;
-        }
-
-        /* For shorts containers in general */
-        ytm-shorts-lockup-view-model:hover .thumbnail-overlay-container {
-            opacity: 1;
-        }
-
-        ytm-shorts-lockup-view-model {
-            position: relative;
-        }
-
-        /* Watch page custom thumbnail */
-        #thumbnailPreview-custom-image {
-            width: 100%;
-            height: auto;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        /* Avatar and banner preview buttons */
-        .thumbnailPreview-button {
-            position: absolute;
-            bottom: 10px;
-            left: 5px;
-            background-color: rgba(0, 0, 0, 0.75);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 3px;
-            font-size: 18px;
-            cursor: pointer;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .thumbnailPreview-container {
-            position: relative;
-        }
-
-        .thumbnailPreview-container:hover .thumbnailPreview-button {
-            opacity: 1;
-        }
-    `;
-
-  const style = document.createElement("style");
-  style.textContent = css;
-  document.head.appendChild(style);
-
-  function extractVideoId(url) {
-    const regularMatch = url.match(/[?&]v=([^&]+)/);
-    if (regularMatch) {
-      return regularMatch[1];
+            z-index: 1000;
+            transition: background 0.2s ease;
+        `;
+        
+        overlay.onmouseenter = () => {
+            overlay.style.background = 'rgba(0, 0, 0, 0.9)';
+            svg.style.stroke = '#f50057';
+        };
+        overlay.onmouseleave = () => {
+            overlay.style.background = 'rgba(0, 0, 0, 0.7)';
+            svg.style.stroke = 'white';
+        };
+        
+        overlay.onclick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isShorts = container.closest('ytm-shorts-lockup-view-model') || 
+                           container.closest('.shortsLockupViewModelHost') ||
+                           container.closest('[class*="shortsLockupViewModelHost"]') ||
+                           container.querySelector('a[href*="/shorts/"]');
+            
+            await openThumbnail(videoId, !!isShorts, overlay);
+        };
+        
+        return overlay;
     }
 
-    const shortsMatch = url.match(/\/shorts\/([^?&]+)/);
-    if (shortsMatch) {
-      return shortsMatch[1];
-    }
+    function addThumbnailOverlay(container) {
+        if (container.querySelector('.thumb-overlay')) return;
 
-    return null;
-  }
-
-  function openImageInNewTab(url) {
-    window.open(url, "_blank");
-  }
-
-  function createSVGElement(pathD) {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    svg.setAttribute("width", "1em");
-    svg.setAttribute("height", "1em");
-    svg.setAttribute("viewBox", "0 0 24 24");
-
-    path.setAttribute("fill", "currentColor");
-    path.setAttribute("d", pathD);
-
-    svg.appendChild(path);
-    return svg;
-  }
-
-  const defaultIconPath =
-    "M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4";
-  const hoverIconPath =
-    "M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8zM5 19l3-4l2 3l3-4l4 5z";
-
-  let thumbnailPreviewCurrentVideoId = "";
-  let thumbnailInsertionAttempts = 0;
-  const MAX_ATTEMPTS = 10;
-  const RETRY_DELAY = 500;
-
-  function createOverlayButton(videoId, isShorts = false) {
-    const container = document.createElement("div");
-    container.className = "thumbnail-overlay-container";
-
-    const button = document.createElement("button");
-    button.className = "thumbnail-overlay-button";
-
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute(
-      "d",
-      "M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4"
-    );
-
-    svg.appendChild(path);
-    button.appendChild(svg);
-
-    const dropdown = document.createElement("div");
-    dropdown.className = "thumbnail-dropdown";
-
-    let thumbnailOptions;
-
-    if (isShorts) {
-      thumbnailOptions = [
-        { name: "Default", filename: "oardefault.jpg" },
-        { name: "Alternative 1", filename: "oar1.jpg" },
-        { name: "Alternative 2 (Default)", filename: "oar2.jpg" },
-        { name: "Alternative 3", filename: "oar3.jpg" },
-      ];
-    } else {
-      thumbnailOptions = [
-        { name: "Default (120x90)", filename: "default.jpg" },
-        { name: "Medium (320x180)", filename: "mqdefault.jpg" },
-        { name: "High (480x360)", filename: "hqdefault.jpg" },
-        { name: "Standard (640x480)", filename: "sddefault.jpg" },
-        { name: "Max Res (1280x720)", filename: "maxresdefault.jpg" },
-      ];
-    }
-
-    thumbnailOptions.forEach((option) => {
-      const item = document.createElement("button");
-      item.className = "thumbnail-dropdown-item";
-      item.textContent = option.name;
-
-      item.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/${option.filename}`;
-        openImageInNewTab(thumbnailUrl);
-        dropdown.classList.remove("show");
-      });
-
-      dropdown.appendChild(item);
-    });
-
-    button.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      document.querySelectorAll(".thumbnail-dropdown.show").forEach((d) => {
-        if (d !== dropdown) d.classList.remove("show");
-      });
-
-      dropdown.classList.toggle("show");
-    });
-
-    document.addEventListener("click", function (e) {
-      if (!container.contains(e.target)) {
-        dropdown.classList.remove("show");
-      }
-    });
-
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
-        dropdown.classList.remove("show");
-      }
-    });
-
-    container.appendChild(dropdown);
-    container.appendChild(button);
-
-    return container;
-  }
-
-  function addButtonToElement(element, getFullSizeUrl) {
-    if (!element.closest(".thumbnailPreview-container")) {
-      const container = document.createElement("div");
-      container.className = "thumbnailPreview-container";
-      element.parentNode.insertBefore(container, element);
-      container.appendChild(element);
-
-      const button = document.createElement("button");
-      button.className = "thumbnailPreview-button";
-
-      const defaultIcon = createSVGElement(defaultIconPath);
-      button.appendChild(defaultIcon);
-
-      button.addEventListener("mouseenter", () => {
-        button.innerHTML = "";
-        button.appendChild(createSVGElement(hoverIconPath));
-      });
-
-      button.addEventListener("mouseleave", () => {
-        button.innerHTML = "";
-        button.appendChild(createSVGElement(defaultIconPath));
-      });
-
-      button.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const url = getFullSizeUrl(element.src);
-        if (url) {
-          openImageInNewTab(url);
+        let videoId = null;
+        let thumbnailContainer = null;
+        
+        const img = container.querySelector('img[src*="ytimg.com"]');
+        if (img?.src) {
+            videoId = extractVideoId(img.src);
+            thumbnailContainer = img.closest('yt-thumbnail-view-model') || img.parentElement;
         }
-      });
-
-      container.appendChild(button);
-    }
-  }
-
-  function isWatchPage() {
-    const url = new URL(window.location.href);
-    return url.pathname === "/watch" && url.searchParams.has("v");
-  }
-
-  function addOrUpdateThumbnailImage() {
-    if (!isWatchPage()) return;
-
-    const newVideoId = new URLSearchParams(window.location.search).get("v");
-
-    if (!newVideoId || newVideoId === thumbnailPreviewCurrentVideoId) {
-      return;
-    }
-
-    thumbnailPreviewCurrentVideoId = newVideoId;
-
-    function attemptInsertion() {
-      const targetElement = document.querySelector("#secondary-inner #panels");
-      const existingImg = document.getElementById(
-        "thumbnailPreview-custom-image"
-      );
-
-      if (existingImg) {
-        existingImg.src = `https://i.ytimg.com/vi/${thumbnailPreviewCurrentVideoId}/mqdefault.jpg`;
-        thumbnailInsertionAttempts = 0;
-        return;
-      }
-
-      if (!targetElement) {
-        thumbnailInsertionAttempts++;
-        if (thumbnailInsertionAttempts < MAX_ATTEMPTS) {
-          setTimeout(attemptInsertion, RETRY_DELAY);
-        } else {
-          thumbnailInsertionAttempts = 0;
-        }
-        return;
-      }
-
-      const img = document.createElement("img");
-      img.id = "thumbnailPreview-custom-image";
-      img.src = `https://i.ytimg.com/vi/${thumbnailPreviewCurrentVideoId}/mqdefault.jpg`;
-
-      img.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const maxResUrl = `https://i.ytimg.com/vi/${thumbnailPreviewCurrentVideoId}/maxresdefault.jpg`;
-        openImageInNewTab(maxResUrl);
-      });
-
-      targetElement.parentNode.insertBefore(img, targetElement);
-      thumbnailInsertionAttempts = 0;
-    }
-
-    attemptInsertion();
-  }
-
-  function processAvatars() {
-    const avatars = document.querySelectorAll(
-      "yt-avatar-shape img, yt-img-shadow#avatar img"
-    );
-    avatars.forEach((img) => {
-      if (!img.closest(".thumbnailPreview-container")) {
-        addButtonToElement(img, (src) =>
-          src.replace(/=s\d+-c-k-c0x00ffffff-no-rj.*/, "=s0")
-        );
-
-        if (isWatchPage()) {
-          const button = img
-            .closest(".thumbnailPreview-container")
-            .querySelector(".thumbnailPreview-button");
-          if (button) {
-            button.style.display = "none";
-          }
-        }
-      }
-    });
-  }
-
-  function processChannelBanners() {
-    const banners = document.querySelectorAll("yt-image-banner-view-model img");
-    banners.forEach((img) => {
-      if (!img.closest(".thumbnailPreview-container")) {
-        addButtonToElement(img, (src) => src.replace(/=w\d+-.*/, "=s0"));
-      }
-    });
-  }
-
-  function cleanupDuplicateButtons() {
-    const shortsWithMultipleButtons = document.querySelectorAll(
-      "ytm-shorts-lockup-view-model"
-    );
-    shortsWithMultipleButtons.forEach((shortsContainer) => {
-      const buttons = shortsContainer.querySelectorAll(
-        ".thumbnail-overlay-container"
-      );
-      if (buttons.length > 1) {
-        const thumbnailContainer = shortsContainer.querySelector(
-          ".shortsLockupViewModelHostThumbnailContainer"
-        );
-        const preferredButton = thumbnailContainer
-          ? thumbnailContainer.querySelector(".thumbnail-overlay-container")
-          : buttons[0];
-
-        buttons.forEach((button) => {
-          if (button !== preferredButton) {
-            button.remove();
-          }
-        });
-      }
-    });
-  }
-
-  function addOverlayButtons() {
-    const sidebarThumbnails = document.querySelectorAll(
-      ".yt-lockup-view-model-wiz__content-image:not([data-overlay-added])"
-    );
-    sidebarThumbnails.forEach((container) => {
-      const href = container.getAttribute("href");
-      if (href) {
-        const videoId = extractVideoId(href);
-        if (videoId) {
-          const overlayButton = createOverlayButton(videoId, false);
-          container.appendChild(overlayButton);
-          container.setAttribute("data-overlay-added", "true");
-        }
-      }
-    });
-
-    const channelThumbnails = document.querySelectorAll(
-      "ytd-thumbnail:not([data-overlay-added])"
-    );
-    channelThumbnails.forEach((thumbnail) => {
-      const link = thumbnail.querySelector('a[href*="/watch?v="]');
-      if (link) {
-        const href = link.getAttribute("href");
-        const videoId = extractVideoId(href);
-        if (videoId) {
-          const overlayButton = createOverlayButton(videoId, false);
-          thumbnail.appendChild(overlayButton);
-          thumbnail.setAttribute("data-overlay-added", "true");
-        }
-      }
-    });
-
-    const allShortsContainers = document.querySelectorAll(
-      "ytm-shorts-lockup-view-model:not([data-overlay-added])"
-    );
-    console.log("Found shorts containers:", allShortsContainers.length);
-
-    allShortsContainers.forEach((shortsContainer) => {
-      const link = shortsContainer.querySelector('a[href*="/shorts/"]');
-      if (link) {
-        const href = link.getAttribute("href");
-        const videoId = extractVideoId(href);
-        console.log("Processing shorts:", videoId, href);
-
-        if (videoId) {
-          const overlayButton = createOverlayButton(videoId, true);
-
-          const thumbnailContainer = shortsContainer.querySelector(
-            ".shortsLockupViewModelHostThumbnailContainer"
-          );
-          if (thumbnailContainer) {
-            console.log("Adding button to thumbnail container");
-            thumbnailContainer.appendChild(overlayButton);
-          } else {
-            console.log("Adding button to main container");
-            shortsContainer.appendChild(overlayButton);
-          }
-
-          shortsContainer.setAttribute("data-overlay-added", "true");
-        }
-      }
-    });
-
-    const sidebarShorts = document.querySelectorAll(
-      ".shortsLockupViewModelHostEndpoint:not([data-overlay-added])"
-    );
-    sidebarShorts.forEach((container) => {
-      if (container.closest("ytm-shorts-lockup-view-model")) {
-        return;
-      }
-
-      const href = container.getAttribute("href");
-      if (href) {
-        const videoId = extractVideoId(href);
-        if (videoId) {
-          const overlayButton = createOverlayButton(videoId, true);
-          container.appendChild(overlayButton);
-          container.setAttribute("data-overlay-added", "true");
-        }
-      }
-    });
-
-    addOrUpdateThumbnailImage();
-
-    processAvatars();
-    processChannelBanners();
-
-    cleanupDuplicateButtons();
-  }
-
-  function observeChanges() {
-    const observer = new MutationObserver(function (mutations) {
-      let shouldCheck = false;
-      mutations.forEach(function (mutation) {
-        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-          mutation.addedNodes.forEach(function (node) {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              if (
-                node.querySelector &&
-                (node.querySelector(
-                  ".yt-lockup-view-model-wiz__content-image"
-                ) ||
-                  node.classList.contains(
-                    "yt-lockup-view-model-wiz__content-image"
-                  ) ||
-                  node.querySelector(".shortsLockupViewModelHostEndpoint") ||
-                  node.classList.contains(
-                    "shortsLockupViewModelHostEndpoint"
-                  ) ||
-                  node.querySelector("ytd-thumbnail") ||
-                  node.classList.contains("ytd-thumbnail") ||
-                  node.querySelector("ytm-shorts-lockup-view-model") ||
-                  node.classList.contains("ytm-shorts-lockup-view-model") ||
-                  node.querySelector("yt-avatar-shape") ||
-                  node.classList.contains("yt-avatar-shape") ||
-                  node.querySelector("yt-image-banner-view-model") ||
-                  node.classList.contains("yt-image-banner-view-model"))
-              ) {
-                shouldCheck = true;
-              }
+        
+        if (!videoId) {
+            const link = container.querySelector('a[href*="/shorts/"]');
+            if (link?.href) {
+                videoId = extractShortsId(link.href);
+                
+                const shortsImg = container.querySelector('img[src*="ytimg.com"]');
+                if (shortsImg) {
+                    thumbnailContainer = shortsImg.closest('.ytCoreImageHost') || 
+                                       shortsImg.closest('[class*="ThumbnailContainer"]') ||
+                                       shortsImg.closest('[class*="ImageHost"]') ||
+                                       shortsImg.parentElement;
+                }
             }
-          });
         }
-      });
 
-      if (shouldCheck) {
-        setTimeout(addOverlayButtons, 100);
-      }
-    });
+        if (!videoId || !thumbnailContainer) return;
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-  }
-
-  function setupUrlChangeDetection() {
-    let currentUrl = location.href;
-
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function () {
-      originalPushState.apply(history, arguments);
-      setTimeout(() => {
-        if (location.href !== currentUrl) {
-          currentUrl = location.href;
-          setTimeout(addOverlayButtons, 500);
+        if (getComputedStyle(thumbnailContainer).position === 'static') {
+            thumbnailContainer.style.position = 'relative';
         }
-      }, 100);
-    };
+        
+        const overlay = createThumbnailOverlay(videoId, container);
+        overlay.className = 'thumb-overlay';
+        thumbnailContainer.appendChild(overlay);
+    }
 
-    history.replaceState = function () {
-      originalReplaceState.apply(history, arguments);
-      setTimeout(() => {
-        if (location.href !== currentUrl) {
-          currentUrl = location.href;
-          setTimeout(addOverlayButtons, 500);
+    function createAvatarOverlay() {
+        const overlay = document.createElement('div');
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'white');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        svg.style.transition = 'stroke 0.2s ease';
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '8');
+        circle.setAttribute('r', '5');
+        svg.appendChild(circle);
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M20 21a8 8 0 0 0-16 0');
+        svg.appendChild(path);
+        
+        overlay.appendChild(svg);
+        
+        overlay.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.2s ease;
+        `;
+        
+        overlay.onmouseenter = () => {
+            overlay.style.background = 'rgba(0, 0, 0, 0.9)';
+            svg.style.stroke = '#f50057';
+        };
+        overlay.onmouseleave = () => {
+            overlay.style.background = 'rgba(0, 0, 0, 0.7)';
+            svg.style.stroke = 'white';
+        };
+        
+        return overlay;
+    }
+
+    function addAvatarOverlay(img) {
+        const container = img.parentElement;
+        if (container.querySelector('.avatar-overlay')) return;
+
+        if (getComputedStyle(container).position === 'static') {
+            container.style.position = 'relative';
         }
-      }, 100);
-    };
 
-    window.addEventListener("popstate", function () {
-      setTimeout(() => {
-        if (location.href !== currentUrl) {
-          currentUrl = location.href;
-          setTimeout(addOverlayButtons, 500);
+        const overlay = createAvatarOverlay();
+        overlay.className = 'avatar-overlay';
+        
+        overlay.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const highResUrl = img.src.replace(/=s\d+-c-k-c0x00ffffff-no-rj.*/, '=s0');
+            window.open(highResUrl, '_blank');
+        };
+
+        container.appendChild(overlay);
+
+        container.onmouseenter = () => overlay.style.opacity = '1';
+        container.onmouseleave = () => overlay.style.opacity = '0';
+    }
+
+    function createBannerOverlay() {
+        const overlay = document.createElement('div');
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'white');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        svg.style.transition = 'stroke 0.2s ease';
+        
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', '3');
+        rect.setAttribute('y', '3');
+        rect.setAttribute('width', '18');
+        rect.setAttribute('height', '18');
+        rect.setAttribute('rx', '2');
+        rect.setAttribute('ry', '2');
+        svg.appendChild(rect);
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '9');
+        circle.setAttribute('cy', '9');
+        circle.setAttribute('r', '2');
+        svg.appendChild(circle);
+        
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', '21,15 16,10 5,21');
+        svg.appendChild(polyline);
+        
+        overlay.appendChild(svg);
+        
+        overlay.style.cssText = `
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.2s ease;
+        `;
+        
+        overlay.onmouseenter = () => {
+            overlay.style.background = 'rgba(0, 0, 0, 0.9)';
+            svg.style.stroke = '#f50057';
+        };
+        overlay.onmouseleave = () => {
+            overlay.style.background = 'rgba(0, 0, 0, 0.7)';
+            svg.style.stroke = 'white';
+        };
+        
+        return overlay;
+    }
+
+    function addBannerOverlay(img) {
+        const container = img.parentElement;
+        if (container.querySelector('.banner-overlay')) return;
+
+        if (getComputedStyle(container).position === 'static') {
+            container.style.position = 'relative';
         }
-      }, 100);
-    });
 
-    setInterval(function () {
-      if (location.href !== currentUrl) {
-        currentUrl = location.href;
-        setTimeout(addOverlayButtons, 300);
-      }
-    }, 500);
+        const overlay = createBannerOverlay();
+        overlay.className = 'banner-overlay';
+        
+        overlay.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const highResUrl = img.src.replace(/=w\d+-.*/, '=s0');
+            window.open(highResUrl, '_blank');
+        };
 
-    document.addEventListener("yt-navigate-start", function () {
-      setTimeout(addOverlayButtons, 1000);
-    });
+        container.appendChild(overlay);
 
-    document.addEventListener("yt-navigate-finish", function () {
-      setTimeout(addOverlayButtons, 500);
-    });
-  }
+        container.onmouseenter = () => overlay.style.opacity = '1';
+        container.onmouseleave = () => overlay.style.opacity = '0';
+    }
 
-  function observePageChanges() {
-    const contentObserver = new MutationObserver((mutations) => {
-      let shouldProcessRegular = false;
+    function processAvatars() {
+        const avatarSelectors = [
+            'yt-avatar-shape img',
+            '#avatar img',
+            'ytd-channel-avatar-editor img',
+            '.ytd-video-owner-renderer img[src*="yt"]'
+        ];
 
-      mutations.forEach((mutation) => {
-        if (mutation.addedNodes.length > 0) {
-          shouldProcessRegular = true;
-        }
-      });
-
-      if (shouldProcessRegular) {
-        processAvatars();
-        processChannelBanners();
-      }
-    });
-
-    const panelObserver = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (
-          mutation.type === "childList" &&
-          (mutation.target.id === "secondary" ||
-            mutation.target.id === "secondary-inner")
-        ) {
-          addOrUpdateThumbnailImage();
-        }
-      }
-    });
-
-    contentObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    const observeSecondary = () => {
-      const secondary = document.getElementById("secondary");
-      if (secondary) {
-        panelObserver.observe(secondary, {
-          childList: true,
-          subtree: true,
+        avatarSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(img => {
+                if (img.src && img.src.includes('yt') && !img.closest('.avatar-overlay')) {
+                    addAvatarOverlay(img);
+                }
+            });
         });
-      } else {
-        setTimeout(observeSecondary, 1000);
-      }
-    };
+    }
 
-    observeSecondary();
-  }
+    function processBanners() {
+        const bannerSelectors = [
+            'yt-image-banner-view-model img',
+            'ytd-c4-tabbed-header-renderer img[src*="yt"]',
+            '#channel-header img[src*="banner"]'
+        ];
 
-  function init() {
-    addOverlayButtons();
-    observeChanges();
-    observePageChanges();
-    setupUrlChangeDetection();
+        bannerSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(img => {
+                if (img.src && (img.src.includes('banner') || img.src.includes('yt')) && !img.closest('.banner-overlay')) {
+                    addBannerOverlay(img);
+                }
+            });
+        });
+    }
 
-    window.addEventListener("yt-navigate-finish", () => {
-      addOrUpdateThumbnailImage();
-      setTimeout(addOverlayButtons, 1000);
-    });
+    function processThumbnails() {
+        document.querySelectorAll('yt-thumbnail-view-model').forEach(addThumbnailOverlay);
+        document.querySelectorAll('.ytd-thumbnail').forEach(addThumbnailOverlay);
+        
+        document.querySelectorAll('ytm-shorts-lockup-view-model').forEach(addThumbnailOverlay);
+        document.querySelectorAll('.shortsLockupViewModelHost').forEach(addThumbnailOverlay);
+        document.querySelectorAll('[class*="shortsLockupViewModelHost"]').forEach(addThumbnailOverlay);
+    }
 
-    setTimeout(addOverlayButtons, 2000);
-    setTimeout(addOverlayButtons, 5000);
-  }
+    function processAll() {
+        processThumbnails();
+        processAvatars();
+        processBanners();
+        addOrUpdateThumbnailImage();
+    }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+    function setupMutationObserver() {
+        const observer = new MutationObserver(() => {
+            setTimeout(processAll, 50);
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    function setupUrlChangeDetection() {
+        let currentUrl = location.href;
+
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+
+        history.pushState = function () {
+            originalPushState.apply(history, arguments);
+            setTimeout(() => {
+                if (location.href !== currentUrl) {
+                    currentUrl = location.href;
+                    setTimeout(addOrUpdateThumbnailImage, 500);
+                }
+            }, 100);
+        };
+
+        history.replaceState = function () {
+            originalReplaceState.apply(history, arguments);
+            setTimeout(() => {
+                if (location.href !== currentUrl) {
+                    currentUrl = location.href;
+                    setTimeout(addOrUpdateThumbnailImage, 500);
+                }
+            }, 100);
+        };
+
+        window.addEventListener("popstate", function () {
+            setTimeout(() => {
+                if (location.href !== currentUrl) {
+                    currentUrl = location.href;
+                    setTimeout(addOrUpdateThumbnailImage, 500);
+                }
+            }, 100);
+        });
+
+        setInterval(function () {
+            if (location.href !== currentUrl) {
+                currentUrl = location.href;
+                setTimeout(addOrUpdateThumbnailImage, 300);
+            }
+        }, 500);
+    }
+
+    function initialize() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(init, 100);
+            });
+        } else {
+            setTimeout(init, 100);
+        }
+    }
+
+    function init() {
+        setupUrlChangeDetection();
+        setupMutationObserver();
+        processAll();
+        setTimeout(processAll, 500);
+        setTimeout(processAll, 1000);
+        setTimeout(processAll, 2000);
+    }
+
+    initialize();
+    
 })();

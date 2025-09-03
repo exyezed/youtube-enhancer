@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Thumbnail Preview)
 // @description  View Original Avatar, Banner, Video and Shorts Thumbnails.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.7
+// @version      1.8
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -294,8 +294,7 @@
         svg.appendChild(path);
         
         overlay.appendChild(svg);
-        
-        overlay.style.cssText = `
+          overlay.style.cssText = `
             position: absolute;
             bottom: 8px;
             left: 8px;
@@ -308,7 +307,8 @@
             border-radius: 4px;
             cursor: pointer;
             z-index: 1000;
-            transition: background 0.2s ease;
+            opacity: 0;
+            transition: all 0.2s ease;
         `;
         
         overlay.onmouseenter = () => {
@@ -367,10 +367,13 @@
         if (getComputedStyle(thumbnailContainer).position === 'static') {
             thumbnailContainer.style.position = 'relative';
         }
-        
-        const overlay = createThumbnailOverlay(videoId, container);
+          const overlay = createThumbnailOverlay(videoId, container);
         overlay.className = 'thumb-overlay';
         thumbnailContainer.appendChild(overlay);
+
+        // Add hover effect to show/hide overlay
+        thumbnailContainer.onmouseenter = () => overlay.style.opacity = '1';
+        thumbnailContainer.onmouseleave = () => overlay.style.opacity = '0';
     }
 
     function createAvatarOverlay() {

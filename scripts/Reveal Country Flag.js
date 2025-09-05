@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Reveal Country Flag)
 // @description  Reveal Country Flag.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.9
+// @version      2.0
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -11,24 +11,17 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @require      https://cdn.jsdelivr.net/npm/date-fns@4.1.0/cdn.min.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
+    /* ----------------------------- CONFIG -------------------------------- */
+
     const FLAG_CONFIG = {
         BASE_URL: 'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/flags/4x3/',
-        SIZES: {
-            channel: '28px',
-            video: '22px',
-            shorts: '20px'
-        },
-        MARGINS: {
-            channel: '12px',
-            video: '10px',
-            shorts: '8px'
-        }
+        SIZES: { channel: '28px', video: '22px', shorts: '20px' },
+        MARGINS: { channel: '12px', video: '10px', shorts: '8px' }
     };
 
     const CACHE_CONFIG = {
@@ -36,29 +29,53 @@
         EXPIRATION: 7 * 24 * 60 * 60 * 1000
     };
 
+    /* ------------------------ STATE (GLOBAL REFS) ------------------------- */
+
     const processedElements = new Set();
-    const processedChannelAge = new Set();
+    let channelAgeEl = null;
+
+    /* ---------------------------- UTILITIES ------------------------------- */
 
     function getCacheKey(type, id) {
         return `${CACHE_CONFIG.PREFIX}${type}_${id}`;
     }
 
     function getFromCache(type, id) {
-        const cacheKey = getCacheKey(type, id);
-        const cachedData = GM_getValue(cacheKey);
-        if (!cachedData) return null;
-        const { value, timestamp } = JSON.parse(cachedData);
-        if (Date.now() - timestamp > CACHE_CONFIG.EXPIRATION) {
-            GM_setValue(cacheKey, null);
+        try {
+            const cacheKey = getCacheKey(type, id);
+            const cachedData = GM_getValue(cacheKey);
+            if (!cachedData) return null;
+            const { value, timestamp } = JSON.parse(cachedData);
+            if (Date.now() - timestamp > CACHE_CONFIG.EXPIRATION) {
+                GM_setValue(cacheKey, null);
+                return null;
+            }
+            return value;
+        } catch {
             return null;
         }
-        return value;
     }
 
     function setToCache(type, id, value) {
         const cacheKey = getCacheKey(type, id);
         GM_setValue(cacheKey, JSON.stringify({ value, timestamp: Date.now() }));
     }
+
+    function waitFor(checkFn, { timeout = 6000, interval = 120 } = {}) {
+        return new Promise(resolve => {
+            const start = performance.now();
+            const tick = () => {
+                try {
+                    if (checkFn()) return resolve(true);
+                } catch {}
+                if (performance.now() - start >= timeout) return resolve(false);
+                setTimeout(tick, interval);
+            };
+            tick();
+        });
+    }
+
+    /* --------------------------- DATA FETCHING ---------------------------- */
 
     async function getCountryData(type, id) {
         const cachedValue = getFromCache(type, id);
@@ -73,16 +90,18 @@
         return new Promise((resolve) => {
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: url,
+                url,
                 onload: function (response) {
                     if (response.status >= 200 && response.status < 300) {
                         try {
                             const data = JSON.parse(response.responseText);
                             const countryData = {
-                                code: data.country.toLowerCase(),
-                                name: data.countryName,
-                                creationDate: data.creationDate,
-                                channelAge: data.creationDate ? calculateChannelAge(data.creationDate) : data.channelAge
+                                code: (data.country || '').toLowerCase(),
+                                name: data.countryName || '',
+                                creationDate: data.creationDate || '',
+                                channelAge: data.creationDate
+                                    ? calculateChannelAge(data.creationDate)
+                                    : (data.channelAge || '')
                             };
                             setToCache(type, id, countryData);
                             resolve(countryData);
@@ -107,68 +126,61 @@
         });
     }
 
+    /* ---------------------- CHANNEL AGE (NO DEPENDENCY) ------------------- */
+
     function calculateChannelAge(creationDateStr) {
         try {
             const creationDate = new Date(creationDateStr);
             const now = new Date();
+            if (isNaN(creationDate.getTime())) return "";
 
-            if (!creationDate || isNaN(creationDate.getTime())) {
-                return "";
-            }
+            let temp = new Date(creationDate);
+            let years = 0, months = 0, days = 0, hours = 0, minutes = 0;
 
-            const years = dateFns.differenceInYears(now, creationDate);
-            let tempDate = dateFns.addYears(creationDate, years);
+            const add = (d, { y = 0, m = 0, dd = 0, hh = 0, mm = 0 } = {}) => {
+                const nd = new Date(d);
+                if (y) nd.setFullYear(nd.getFullYear() + y);
+                if (m) nd.setMonth(nd.getMonth() + m);
+                if (dd) nd.setDate(nd.getDate() + dd);
+                if (hh) nd.setHours(nd.getHours() + hh);
+                if (mm) nd.setMinutes(nd.getMinutes() + mm);
+                return nd;
+            };
 
-            const months = dateFns.differenceInMonths(now, tempDate);
-            tempDate = dateFns.addMonths(tempDate, months);
-
-            const days = dateFns.differenceInDays(now, tempDate);
-            tempDate = dateFns.addDays(tempDate, days);
-
-            const hours = dateFns.differenceInHours(now, tempDate);
-            tempDate = dateFns.addHours(tempDate, hours);
-
-            const minutes = dateFns.differenceInMinutes(now, tempDate);
+            while (add(temp, { y: 1 }) <= now) { temp = add(temp, { y: 1 }); years++; }
+            while (add(temp, { m: 1 }) <= now) { temp = add(temp, { m: 1 }); months++; }
+            while (add(temp, { dd: 1 }) <= now) { temp = add(temp, { dd: 1 }); days++; }
+            while (add(temp, { hh: 1 }) <= now) { temp = add(temp, { hh: 1 }); hours++; }
+            while (add(temp, { mm: 1 }) <= now) { temp = add(temp, { mm: 1 }); minutes++; }
 
             let ageString = "";
 
             if (years > 0) {
                 ageString += `${years}y`;
-
-                if (months > 0) {
-                    ageString += ` ${months}m`;
-                }
+                if (months > 0) ageString += ` ${months}m`;
             } else if (months > 0) {
                 ageString += `${months}m`;
-
-                if (days > 0) {
-                    ageString += ` ${days}d`;
-                }
+                if (days > 0) ageString += ` ${days}d`;
             } else if (days > 0) {
                 ageString += `${days}d`;
-
-                if (hours > 0) {
-                    ageString += ` ${hours}h`;
-                }
+                if (hours > 0) ageString += ` ${hours}h`;
             } else if (hours > 0) {
                 ageString += `${hours}h`;
-
-                if (minutes > 0) {
-                    ageString += ` ${minutes}m`;
-                }
+                if (minutes > 0) ageString += ` ${minutes}m`;
             } else if (minutes > 0) {
                 ageString += `${minutes}m`;
             } else {
                 ageString += "<1m";
             }
 
-            ageString += " ago";
-            return ageString;
+            return ageString + " ago";
         } catch (error) {
             console.error('Error calculating channel age:', error);
             return "";
         }
     }
+
+    /* --------------------------- DOM HELPERS ------------------------------ */
 
     function createFlag(size, margin, className, countryData) {
         const flag = document.createElement('img');
@@ -179,64 +191,125 @@
         flag.style.marginLeft = margin;
         flag.style.verticalAlign = 'middle';
         flag.style.cursor = 'pointer';
-        flag.title = countryData.name;
+        flag.title = countryData.name || '';
         return flag;
     }
 
     function removeExistingFlags(element) {
-        const existingFlags = element.querySelectorAll('.country-flag');
-        existingFlags.forEach(flag => flag.remove());
+        element.querySelectorAll('.country-flag').forEach(flag => flag.remove());
     }
 
     function removeExistingChannelAge() {
-        const ageElements = document.querySelectorAll('.channel-age-element');
-        ageElements.forEach(el => el.remove());
-
-        const delimiterElements = document.querySelectorAll('.channel-age-delimiter');
-        delimiterElements.forEach(el => el.remove());
+        document.querySelectorAll('.channel-age-element').forEach(el => el.remove());
+        document.querySelectorAll('.channel-age-delimiter').forEach(el => el.remove());
+        channelAgeEl = null;
     }
 
-    function addChannelAge(countryData) {
-        if (!countryData || !countryData.channelAge) return;
+    function findMetadataRows() {
+        let rows = document.querySelectorAll('.yt-content-metadata-view-model__metadata-row');
+        if (rows && rows.length) return rows;
+        rows = document.querySelectorAll('.yt-content-metadata-view-model-wiz__metadata-row');
+        return rows || [];
+    }
 
-        removeExistingChannelAge();
-
-        const metadataRows = document.querySelectorAll('.yt-content-metadata-view-model-wiz__metadata-row');
-        if (!metadataRows.length) return;
-
-        for (const row of metadataRows) {
-            if (row.textContent.includes('video') && !processedChannelAge.has(row)) {
-                processedChannelAge.add(row);
-
-                const delimiter = document.createElement('span');
-                delimiter.className = 'yt-content-metadata-view-model-wiz__delimiter channel-age-delimiter';
-                delimiter.setAttribute('aria-hidden', 'true');
-                delimiter.textContent = '•';
-
-                const ageSpan = document.createElement('span');
-                ageSpan.className = 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color channel-age-element';
-                ageSpan.setAttribute('dir', 'auto');
-                ageSpan.setAttribute('role', 'text');
-
-                const innerSpan = document.createElement('span');
-                innerSpan.setAttribute('dir', 'auto');
-                innerSpan.textContent = ` ${countryData.channelAge}`;
-
-                ageSpan.appendChild(innerSpan);
-
-                row.appendChild(delimiter);
-                row.appendChild(ageSpan);
-
-                break;
-            }
+    function getPreferredMetadataRow(rows) {
+        for (const r of rows) {
+            if (r.querySelector('a[href*="/videos"]')) return r;
         }
+        const byWord = Array.from(rows).find(r =>
+            (r.textContent || '').toLowerCase().includes('video')
+        );
+        if (byWord) return byWord;
+
+        return rows[0];
     }
+
+    async function waitForMetadataRowReady() {
+        const ok = await waitFor(() => {
+            const rows = findMetadataRows();
+            if (!rows.length) return false;
+            const target = getPreferredMetadataRow(rows);
+            if (!target) return false;
+
+            const hasOriginal = Array
+                .from(target.children)
+                .some(ch => !ch.classList?.contains('channel-age-element') && !ch.classList?.contains('channel-age-delimiter'));
+            return hasOriginal;
+        }, { timeout: 8000, interval: 150 });
+
+        if (!ok) return null;
+        const rows = findMetadataRows();
+        return getPreferredMetadataRow(rows);
+    }
+
+    async function ensureChannelAgePlaceholder() {
+        const targetRow = await waitForMetadataRowReady();
+        if (!targetRow) return null;
+
+        const all = document.querySelectorAll('.channel-age-element');
+        if (all.length > 1) {
+            for (let i = 0; i < all.length - 1; i++) all[i].remove();
+        }
+
+        let ageSpan = targetRow.querySelector('.channel-age-element');
+        if (!ageSpan) {
+            const isNew = targetRow.classList.contains('yt-content-metadata-view-model__metadata-row');
+
+            const delimiter = document.createElement('span');
+            delimiter.className = (isNew
+                ? 'yt-content-metadata-view-model__delimiter'
+                : 'yt-content-metadata-view-model-wiz__delimiter') + ' channel-age-delimiter';
+            delimiter.setAttribute('aria-hidden', 'true');
+            delimiter.textContent = '•';
+
+            ageSpan = document.createElement('span');
+            ageSpan.className = (isNew
+                ? 'yt-core-attributed-string yt-content-metadata-view-model__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color'
+                : 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color'
+            ) + ' channel-age-element';
+            ageSpan.setAttribute('dir', 'auto');
+            ageSpan.setAttribute('role', 'text');
+
+            const inner = document.createElement('span');
+            inner.setAttribute('dir', 'auto');
+            inner.textContent = ' Calculating...';
+
+            ageSpan.appendChild(inner);
+            targetRow.appendChild(delimiter);
+            targetRow.appendChild(ageSpan);
+        }
+
+        channelAgeEl = ageSpan;
+        return ageSpan;
+    }
+
+    function setChannelAgeText(text) {
+        const el = channelAgeEl || document.querySelector('.channel-age-element');
+        if (!el) return;
+        const inner = el.querySelector('span[dir="auto"]') || el;
+        inner.textContent = ' ' + (text && text.trim() ? text : '—');
+    }
+
+    async function addChannelAge(countryData) {
+        if (!channelAgeEl) await ensureChannelAgePlaceholder();
+        if (!countryData) {
+            setChannelAgeText('—');
+            return;
+        }
+        setChannelAgeText(countryData.channelAge || '—');
+    }
+
+    /* ---------------------------- MAIN ACTION ----------------------------- */
 
     async function addFlag() {
-        const channelElement = document.querySelector('h1.dynamicTextViewModelH1 > span.yt-core-attributed-string');
+        let channelElement = document.querySelector('h1.dynamicTextViewModelH1 > span.yt-core-attributed-string')
+            || document.querySelector('#channel-name #text')
+            || document.querySelector('yt-formatted-string.style-scope.ytd-channel-name');
+
         if (channelElement && !processedElements.has(channelElement)) {
             removeExistingFlags(channelElement.parentElement || channelElement);
             processedElements.add(channelElement);
+
             let channelId = null;
             const channelUrl = window.location.pathname;
             if (channelUrl.includes('@')) {
@@ -244,14 +317,25 @@
             } else if (channelUrl.includes('/channel/')) {
                 channelId = channelUrl.split('/channel/')[1].split('/')[0];
             }
+            if (!channelId) {
+                const canonicalLink = document.querySelector('link[rel="canonical"]');
+                if (canonicalLink && canonicalLink.href.includes('/channel/')) {
+                    channelId = canonicalLink.href.split('/channel/')[1].split('/')[0];
+                }
+            }
+
             if (channelId) {
+                await ensureChannelAgePlaceholder();
+
                 const countryData = await getCountryData('channel', channelId);
-                if (countryData) {
+
+                if (countryData && countryData.code) {
                     channelElement.appendChild(
                         createFlag(FLAG_CONFIG.SIZES.channel, FLAG_CONFIG.MARGINS.channel, 'channel-flag', countryData)
                     );
-                    addChannelAge(countryData);
                 }
+
+                await addChannelAge(countryData);
             }
         }
 
@@ -261,10 +345,11 @@
             if (videoParent) {
                 removeExistingFlags(videoParent);
                 processedElements.add(videoElement);
+
                 const videoId = new URLSearchParams(window.location.search).get('v');
                 if (videoId) {
                     const countryData = await getCountryData('video', videoId);
-                    if (countryData) {
+                    if (countryData && countryData.code) {
                         videoParent.style.display = 'flex';
                         videoParent.style.alignItems = 'center';
                         videoParent.appendChild(
@@ -282,7 +367,7 @@
                 processedElements.add(element);
                 const shortsId = window.location.pathname.split('/').pop();
                 const countryData = await getCountryData('video', shortsId);
-                if (countryData) {
+                if (countryData && countryData.code) {
                     element.appendChild(
                         createFlag(FLAG_CONFIG.SIZES.shorts, FLAG_CONFIG.MARGINS.shorts, 'shorts-flag', countryData)
                     );
@@ -290,6 +375,8 @@
             }
         }
     }
+
+    /* ------------------------------ OBSERVER ------------------------------ */
 
     function debounce(func, wait) {
         let timeout;
@@ -314,28 +401,25 @@
         const watchPage = document.querySelector('ytd-watch-flexy');
         const browsePage = document.querySelector('ytd-browse');
         const content = document.querySelector('#content');
-
         const targetNode = watchPage || browsePage || content || document.body;
 
-        observer.observe(targetNode, {
-            childList: true,
-            subtree: true
-        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
+    /* ------------------------------- INIT -------------------------------- */
+
     async function init() {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 120));
 
         processedElements.clear();
-        processedChannelAge.clear();
         removeExistingChannelAge();
+
         startObserver();
         addFlag();
 
         window.addEventListener('yt-navigate-finish', () => {
             observer.disconnect();
             processedElements.clear();
-            processedChannelAge.clear();
             removeExistingChannelAge();
             startObserver();
             addFlag();

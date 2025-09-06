@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Thumbnail Preview)
 // @description  View Original Avatar, Banner, Video and Shorts Thumbnails.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.8
+// @version      1.9
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -96,8 +96,8 @@
         }
         
         return spinner;
-    }
-
+    }    
+    
     async function openThumbnail(videoId, isShorts, overlayElement) {
         if (isShorts) {
             const originalSvg = overlayElement.querySelector('svg');
@@ -117,7 +117,22 @@
                 overlayElement.replaceChild(originalSvg, spinner);
             }
         } else {
-            window.open(`https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`, '_blank');
+            const originalSvg = overlayElement.querySelector('svg');
+            const spinner = createSpinner();
+            overlayElement.replaceChild(spinner, originalSvg);
+            
+            try {
+                const maxresdefaultUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+                const isMaxResAvailable = await checkImageExists(maxresdefaultUrl);
+                
+                if (isMaxResAvailable) {
+                    window.open(maxresdefaultUrl, '_blank');
+                } else {
+                    window.open(`https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`, '_blank');
+                }
+            } finally {
+                overlayElement.replaceChild(originalSvg, spinner);
+            }
         }
     }
 
@@ -371,7 +386,6 @@
         overlay.className = 'thumb-overlay';
         thumbnailContainer.appendChild(overlay);
 
-        // Add hover effect to show/hide overlay
         thumbnailContainer.onmouseenter = () => overlay.style.opacity = '1';
         thumbnailContainer.onmouseleave = () => overlay.style.opacity = '0';
     }

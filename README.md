@@ -161,4 +161,10 @@ Check the Monetization Status.
 
 > Video
 
-![image](https://github.com/user-attachments/assets/69a50a78-c51c-4b7e-a981-a36d8410e0dc)
+## 11. Channel Bookmarker
+
+Bookmark and manage YouTube channels with detailed information.
+
+![Installs](http://forkstats.afkarxyz.fun/installs/549772)
+
+![image](https://github.com/user-attachments/assets/498ca9d2-b752-4734-b40f-7a4590feb8a7)

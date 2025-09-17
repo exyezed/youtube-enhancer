@@ -2,7 +2,7 @@
 // @name         YouTube Enhancer (Channel Bookmarker)
 // @description  Bookmark and manage YouTube channels with detailed information.
 // @icon         https://raw.githubusercontent.com/exyezed/youtube-enhancer/refs/heads/main/extras/youtube-enhancer.png
-// @version      1.0
+// @version      1.1
 // @author       exyezed
 // @namespace    https://github.com/exyezed/youtube-enhancer/
 // @supportURL   https://github.com/exyezed/youtube-enhancer/issues
@@ -1301,6 +1301,11 @@
             const existingButton = document.getElementById('cb-floating-bookmark-btn');
             if (existingButton) {
                 existingButton.remove();
+            }
+
+            const parsed = parseChannelUrl(window.location.href);
+            if (!parsed) {
+                return;
             }
 
             const button = document.createElement('button');

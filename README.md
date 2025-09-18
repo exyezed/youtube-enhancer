@@ -26,23 +26,23 @@ View Original Avatar, Banner, Video and Shorts Thumbnails.
 
 > Avatar
 
-![avatar_thumbnail](https://github.com/user-attachments/assets/aaf459e7-0f57-407f-956f-89e8bff8d6a4)
+![avatar_thumbnail](https://github.com/user-attachments/assets/1461eacc-79ae-45e8-bcb1-ec2fc7ace422)
 
 > Banner
 
-![banner_thumbnail](https://github.com/user-attachments/assets/d5e7aaec-13af-46ab-96fa-0ec5df28eb1c)
+![banner_thumbnail](https://github.com/user-attachments/assets/b228e95e-822d-4504-ba28-822cb22c1bec)
 
 > Video
 
-![video_thumbnail](https://github.com/user-attachments/assets/ee221b6d-5160-4cc4-b681-a71459d4a50c)
+![video_thumbnail](https://github.com/user-attachments/assets/a398c4a0-6227-4abe-80fe-a6ca47235439)
 
 > Shorts
 
-![shorts_thumbnail](https://github.com/user-attachments/assets/e4d85085-a0de-42bd-bbb2-9ee597e59b86)
+![shorts_thumbnail](https://github.com/user-attachments/assets/7e24df69-4ad3-4f8c-83ab-c4a6ce51f24e)
 
 > Thumbnail Preview
 
-![panel_thumbnail](https://github.com/user-attachments/assets/91e99c9e-2ae5-4caa-9268-16f529372a3f)
+![panel_thumbnail](https://github.com/user-attachments/assets/63d2ca7b-6c9e-4528-b303-3553c0478aa8)
 
 ## 3. Loop & Screenshot Buttons
 
@@ -52,7 +52,7 @@ Add Loop, Save and Copy Screenshot Buttons.
 
 > Video Player
 
-![image](https://github.com/user-attachments/assets/341c8061-43e3-4f76-b053-fc27365281ab)
+![image](https://github.com/user-attachments/assets/0eac6cbb-4984-4be1-a517-dc3397245832)
 
 > Shorts Player
 
@@ -135,11 +135,7 @@ Display Real-Time Subscriber Count.
 > [!WARNING]
 > Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
 
-![realtime_subs](https://github.com/user-attachments/assets/d8afe244-b274-4d11-8917-6d71b1c942fd)
-
-> Customizable
-
-![realtime_subs_set](https://github.com/user-attachments/assets/be130b58-3429-4810-9722-64bdee95c610)
+![img](https://github.com/user-attachments/assets/0c02063b-3c4c-4907-95d4-d2afcbde4924)
 
 ## 9. Subtitle Downloader
 
@@ -163,8 +159,8 @@ Check the Monetization Status.
 
 ## 11. Channel Bookmarker
 
-Bookmark and manage YouTube channels with detailed information.
+Save YouTube Channels with Detailed Info.
 
 ![Installs](http://forkstats.afkarxyz.fun/installs/549772)
 
-![image](https://github.com/user-attachments/assets/498ca9d2-b752-4734-b40f-7a4590feb8a7)
+![image](https://github.com/user-attachments/assets/b75d0f51-9457-4036-b155-f4ee6cbbc1fa)

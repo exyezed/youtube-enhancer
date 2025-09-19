@@ -135,7 +135,7 @@ Display Real-Time Subscriber Count.
 > [!WARNING]
 > Avoid using AdGuard Desktop, as it may cause blocks and prevent data from appearing.
 
-![img](https://github.com/user-attachments/assets/0c02063b-3c4c-4907-95d4-d2afcbde4924)
+![img](https://github.com/user-attachments/assets/7314b75e-66e2-48d9-b0ad-7974e1c5a226)
 
 ## 9. Subtitle Downloader
 
